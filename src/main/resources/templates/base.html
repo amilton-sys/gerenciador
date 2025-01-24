@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(content)">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Gerenciador</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css"
+        integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+    <main class="flex">
+        <nav class="nav-container flex">
+            <img class="logo" th:src="@{img/logo.png}" alt="logo">
+            <a th:href="@{/}" class="nav-container-item flex">
+                <i class="fa-solid fa-chart-line"></i>
+                Dashboard
+            </a>
+            <a th:href="@{/addExpenses}" class="nav-container-item flex">
+                <i class="fa-solid fa-cash-register"></i>
+                Despesas
+            </a>
+            <a th:href="@{/addShopping}" class="nav-container-item flex">
+                <i class="fa-solid fa-store"></i>
+                Compras
+            </a>
+            <a href="#" class="nav-container-item flex">
+                <i class="fa-solid fa-cubes-stacked"></i>
+                Estoque
+            </a>
+        </nav>
+        <section th:replace="${content}"></section>
+    </main>
+</body>
+
+</html>
