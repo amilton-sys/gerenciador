@@ -4,35 +4,54 @@
 <head>
     <meta charset="UTF-8">
     <title>Gerenciador</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/global.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css"
         integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 
 <body>
-    <main class="flex">
-        <nav class="nav-container flex">
-            <img class="logo" th:src="@{img/logo.png}" alt="logo">
-            <a th:href="@{/}" class="nav-container-item flex">
-                <i class="fa-solid fa-chart-line"></i>
-                Dashboard
-            </a>
-            <a th:href="@{/addExpenses}" class="nav-container-item flex">
-                <i class="fa-solid fa-cash-register"></i>
-                Despesas
-            </a>
-            <a th:href="@{/addShopping}" class="nav-container-item flex">
-                <i class="fa-solid fa-store"></i>
-                Compras
-            </a>
-            <a href="#" class="nav-container-item flex">
-                <i class="fa-solid fa-cubes-stacked"></i>
-                Estoque
-            </a>
+    <div class="navigation-content">
+        <nav class="navigation">
+            <div class="navigation-up">
+                <h1>Gerenciar</h1>
+                <a th:href="@{/}" class="navigation-item">
+                    <i class="fa-solid fa-chart-line navigation-icon"></i>
+                    Dashboard
+                </a>
+                <a th:href="@{/addExpenses}" class="navigation-item">
+                    <i class="fa-solid fa-cash-register navigation-icon"></i>
+                    Despesas
+                </a>
+                <a th:href="@{/addShopping}" class="navigation-item">
+                    <i class="fa-solid fa-store navigation-icon"></i>
+                    Compras
+                </a>
+                <a href="#" class="navigation-item">
+                    <i class="fa-solid fa-cubes-stacked navigation-icon"></i>
+                    Estoque
+                </a>
+            </div>
+            <div class="navigation-down">
+                <div class="logout-button">
+                    <a href="#" class="navigation-item logout">
+                        <i class="fa-solid fa-arrow-right-to-bracket navigation-icon"></i>
+                        Logout
+                    </a>
+                </div>
+                <div class="space"></div>
+                <div class="profile">
+                    <img class="logo-profile" src="/img/foto-perfil.jpg" alt="Profile">
+                    <div class="profile-description">
+                        <p>Amilton José</p>
+                        <small>Ver Perfil</small>
+                    </div>
+                    <a href="#"><i class="fa-solid fa-ellipsis-vertical"></i></a>
+                </div>
+            </div>
         </nav>
         <section th:replace="${content}"></section>
-    </main>
+    </div>
 </body>
 
 </html>

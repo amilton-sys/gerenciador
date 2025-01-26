@@ -1,0 +1,241 @@
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --primary-color: #299D91;
+    --secondary-color: #525256;
+    --white: #FFFFFF;
+    --green: #299D91;
+    --text-label: #191D23;
+    --text-input: #4B5768;
+}
+
+body {
+    font-family: "Poppins", serif;
+}
+
+
+/* Login e Cadastro */
+
+.container-login {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-login {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 400px;
+    height: 600px;
+}
+
+.login-header {
+    margin-bottom: 64px;
+}
+
+.login-title {
+    font-size: 42px;
+    text-align: center;
+    color: var(--green);
+}
+
+.login-description {
+    text-align: center;
+    font-size: 20px;
+}
+
+.input-field {
+    display: flex;
+    width: 400px;
+    height: 80px;
+    flex-direction: column;
+    margin-bottom: 24px;
+    gap: 8px;
+}
+
+.input-field>label {
+    width: 400px;
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.input-field>input {
+    width: 400px;
+    height: 48px;
+    font-size: 16px;
+    color: var(--text-input);
+    border-radius: 8px;
+    padding-left: 10px;
+    border: 1px solid #D0D5DD;
+    outline: none;
+}
+
+.input-field>input:focus {
+    border: 1px solid #4B5768;
+}
+
+.login-password {
+    display: flex;
+    align-items: center;
+}
+
+.login-password>label {
+    flex-grow: 1;
+}
+
+.login-password>a {
+    color: var(--primary-color);
+    font-size: 12px;
+}
+
+.login-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+}
+
+.button {
+    width: 100%;
+    height: 48px;
+    color: var(--white);
+    font-size: 16px;
+    border-radius: 4px;
+    border: none;
+    background-color: var(--primary-color);
+    transition: opacity ease-in-out 0.2s;
+}
+
+.button:active {
+    opacity: .2;
+}
+
+.login-button>a {
+    color: var(--primary-color);
+    font-size: 16px;
+}
+
+span {
+    color: #999DA3;
+}
+
+
+/* Tela Principal */
+
+
+.navigation-content{
+    display: flex;
+    width: 100%;
+    height: 100vh;
+}
+
+.navigation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 280px;
+    height: 100vh;
+    background-color: #191919;
+    padding: 48px 24px;
+}
+
+.navigation-up {
+    width: 224px;
+    height: 504px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-grow: 0.7;
+}
+
+.navigation-up>h1 {
+    color: var(--white);
+    margin-bottom: 48px;
+    font-size: 24px;
+}
+
+.navigation-icon {
+    flex-grow: 0.2;
+}
+
+.navigation-item {
+    display: flex;
+    align-items: center;
+    width: 224px;
+    height: 48px;
+    color: #FFFFFF;
+    padding: 15px;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+.logout {
+    background-color: #262626;
+}
+
+.navigation-item:hover {
+    background-color: var(--primary-color);
+}
+
+.navigation-down {
+    height: 196px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.logout-button{
+    display: flex;
+    width: 224px;
+    height: 104px;
+}
+
+.profile {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 224px;
+    height: 104px;
+}
+
+.profile > a,p,small{
+    color: var(--white);
+}
+
+.profile > small{
+    font-size: 12px;
+}
+
+.profile-description{
+    display: flex;
+    flex-direction: column;
+    margin-right: 45px;
+}
+
+.space{
+    height: 1px;
+    width: 224px;
+    background-color: #ffff;
+    opacity: 8%;
+}
+
+.logo-profile {
+    width: 32px;
+    height: 32px;
+    border-radius: 100%;
+}
+
+/* Dashboard */
+
+.dashboard-content{
+    display: flex;
+}
