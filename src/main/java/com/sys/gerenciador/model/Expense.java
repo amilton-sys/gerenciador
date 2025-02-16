@@ -3,14 +3,24 @@ package com.sys.gerenciador.model;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.Data;
 
 @Data
+@Entity
 public class Expense {
-    private Integer id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String nome;
     private BigDecimal valor;
-    private String categoria;
     private LocalDate date;
-    private String situacao;
+    @Enumerated(EnumType.STRING)
+    private Situacao situacao;
 }

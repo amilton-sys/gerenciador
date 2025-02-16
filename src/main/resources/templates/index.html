@@ -3,11 +3,92 @@
 
 <head>
     <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
-    <section class="dashboard-content">
-        <h1>Dashboard</h1>
+    <section class="content">
+        <div class="chart-container">
+            <h1>Comparação mensal</h1>
+            <canvas id="expensesChart"></canvas>
+        </div>
+        <script>
+            const ctx = document.getElementById('expensesChart').getContext('2d');
+            const thisWeek = [[${ dataThisWeek }]];
+            const lastWeek = [[${ dataLastWeek }]];
+            const labelsj = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+            const expensesChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labelsj,
+                    datasets: [
+                        {
+                            label: 'Mês Atual',
+                            data: thisWeek,
+                            backgroundColor: '#0f766e', // Greenish color
+                            borderRadius: 4,
+                            barThickness: 20,
+                        },
+                        {
+                            label: 'Útilmo Mês',
+                            data: lastWeek,
+                            backgroundColor: '#d1d5db', // Light gray
+                            borderRadius: 4,
+                            barThickness: 20,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                boxWidth: 10
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (tooltipItem) {
+                                    const value = tooltipItem.raw;
+                                    return value.toLocaleString('pt-BR', {
+                                        style: 'currency',
+                                        currency: 'BRL',
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    });
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function (value) {
+                                    const formatter = new Intl.NumberFormat('pt-BR', {
+                                        style: 'currency',
+                                        currency: 'BRL',
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    });
+                                    return formatter.format(value);
+                                }
+                            },
+                            max: 5000
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                        }
+                    }
+                }
+            });
+        </script>
     </section>
 </body>
 

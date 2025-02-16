@@ -1,0 +1,47 @@
+<!-- fragments/nav.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+</head>
+<body>
+    <nav th:fragment="navigation" class="navigation">
+        <div class="navigation-up">
+            <h1>Gerenciar</h1>
+            <a th:href="@{/}" class="navigation-item" th:classappend="${path == '/' ? 'active':''}">
+                <i class="fa-solid fa-chart-line navigation-icon"></i>
+                Visão Geral
+            </a>
+            <a th:href="@{/addExpenses}" class="navigation-item" th:classappend="${path == '/addExpenses' ? 'active':''}">
+                <i class="fa-solid fa-cash-register navigation-icon"></i>
+                Despesas
+            </a>
+            <a th:href="@{/addShopping}" class="navigation-item" th:classappend="${path == '/addShopping' ? 'active':''}">
+                <i class="fa-solid fa-store navigation-icon"></i>
+                Totalizador
+            </a>
+            <a href="#estoque" class="navigation-item" th:classappend="${path == '#estoque' ? 'active':''}">
+                <i class="fa-solid fa-cubes-stacked navigation-icon" ></i>
+                Estoque
+            </a>
+        </div>
+        <div class="navigation-down">
+            <div class="logout-button">
+                <a th:href="@{/logout}" class="navigation-item logout">
+                    <i class="fa-solid fa-arrow-right-to-bracket navigation-icon"></i>
+                    Logout
+                </a>
+            </div>
+            <div class="space"></div>
+            <div class="profile">
+                <img class="logo-profile" src="/img/profile.png" alt="Profile">
+                <div class="profile-description">
+                    <p>Amilton José</p>
+                    <small>Ver Perfil</small>
+                </div>
+                <a href="#"><i class="fa-solid fa-ellipsis-vertical"></i></a>
+            </div>
+        </div>
+    </nav>
+</body>
+
+</html>

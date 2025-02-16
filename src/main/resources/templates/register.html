@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/login.css}">
 </head>
 <body>
     <section class="container-login">
@@ -11,22 +12,30 @@
                 <h1 class="login-title">Gerenciar</h1>
                 <h2 class="login-description">Crie uma Conta</h2>
             </div>
-            <form>
+            <th:block th:if="${session.succMsg}">
+                <p class="success">[[${session.succMsg}]]</p>
+                <th:block th:text="${@commonServiceImpl.removeSessionMessage()}"></th:block>
+            </th:block>
+            <th:block th:if="${session.errorMsg}">
+                <p class="erro">[[${session.errorMsg}]]</p>
+                <th:block th:text="${@commonServiceImpl.removeSessionMessage()}"></th:block>
+            </th:block>
+            <form th:action="@{/saveUser}" method="post">
                 <div class="input-field">
                     <label for="nome">Nome</label>
-                    <input type="text" class="input-nome" placeholder="Digite seu email" id="nome">
+                    <input type="text" class="input-nome" placeholder="Digite seu email" id="nome" name="name">
                 </div>
 
                 <div class="input-field">
                     <label for="email">Email</label>
-                    <input type="email" class="input-email" placeholder="Digite seu email" id="email">
+                    <input type="email" class="input-email" placeholder="Digite seu email" id="email" name="email">
                 </div>
 
                 <div class="input-field">
                     <div class="login-password">
                         <label for="senha">Senha</label>
                     </div>
-                    <input type="password" class="input-senha" placeholder="Digite sua senha" id="senha">
+                    <input type="password" class="input-senha" placeholder="Digite sua senha" id="senha" name="password">
                 </div>
                 <div class="input-field">
                     <div class="login-password">
@@ -35,11 +44,12 @@
                     <input type="password" class="cinput-senha" placeholder="Digite sua confirmação senha" id="csenha">
                 </div>
                 <div class="login-button">
-                    <button class="button">Login</button>
-                    <a th:href="@{/signin}"><span>Já tem uma conta?</span> <strong>Faça login agora!</strong></a>
+                    <button class="button">Cadastrar</button>
+                    <a th:href="@{/login}"><span>Já tem uma conta?</span> <strong>Faça login agora!</strong></a>
                 </div>
             </form>
         </div>
     </section>
+    <script defer src="/js/scripts.js"></script>
 </body>
 </html>
