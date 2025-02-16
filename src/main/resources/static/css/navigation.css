@@ -1,0 +1,107 @@
+/* Tela Principal */
+
+.navigation {
+    display: flex;
+    width: 20%;
+    flex-direction: column;
+    align-items: center;
+    background-color: #191919;
+    padding: 48px 24px;
+}
+
+.navigation-up {
+    width: 224px;
+    height: 504px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-grow: 0.7;
+}
+
+.navigation-up>h1 {
+    color: var(--white);
+    margin-bottom: 48px;
+    font-size: 24px;
+}
+
+.navigation-icon {
+    flex-grow: 0.2;
+    font-size: 24px;
+}
+
+.navigation-item {
+    display: flex;
+    align-items: center;
+    width: 224px;
+    height: 48px;
+    color: #FFFFFF;
+    padding: 15px;
+    border-radius: 4px;
+    text-decoration: none;
+    margin-bottom: 5px;
+}
+
+.logout {
+    background-color: #262626;
+}
+
+.active {
+    background-color: var(--primary-color);
+}
+
+.navigation-item:hover {
+    background-color: var(--primary-color);
+}
+
+.navigation-down {
+    height: 196px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.logout-button {
+    display: flex;
+    width: 224px;
+    height: 104px;
+}
+
+.profile {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 224px;
+    height: 104px;
+}
+
+.profile>a,
+p,
+small {
+    color: var(--white);
+}
+
+.profile>small {
+    font-size: 12px;
+}
+
+.profile-description {
+    display: flex;
+    flex-direction: column;
+    margin-right: 45px;
+}
+
+.space {
+    height: 1px;
+    width: 224px;
+    background-color: #ffff;
+    opacity: 8%;
+}
+
+.logo-profile {
+    width: 32px;
+    height: 32px;
+    border-radius: 100%;
+    background-color: white;
+    border: 1px solid var(--primary-color);
+    object-fit: contain;
+}

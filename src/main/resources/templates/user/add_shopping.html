@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org" th:replace="~{base::layout(~{::section})}">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <section class="content">
+        <div class="totalizador">
+            <div class="contabilizador-salario">
+                <h3 style="text-align: center;">Total</h3>
+                <div>
+                    <p style="font-size: 30px; color: #000;">R$ 0,00</p>
+                </div>
+            </div>
+        </div>
+        <div id="addAmountModal" class="modal">
+            <div class="modal-content">
+                <h1>Salário</h1>
+                <form action="/addAmount" method="post" id="formAddAmount">
+                    <div class="input-field" style="flex-direction: row; align-items: center;">
+                        <label for="valor" style="text-align: start;">Valor</label>
+                        <input type="text" placeholder="Digite o valor" id="valor" name="amountStr" required>
+                    </div>
+                    <div class="expense-button">
+                        <button class="button">Salvar</button>
+                        <button type="reset" class="button close"
+                            style="background-color: white;color: #383e49;border: 1px solid #383e49;">Descartar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="expenses-menu">
+            <p>Compras</p>
+            <button name="addExpense" id="addExpense">Adicionar</button>
+        </div>
+        <div class="expenses">
+            <div class="table" th:if="${expenseSize>0}">
+                <table>
+                    <thead>
+                        <tr>
+                            <th rowspan="2">Nome</th>
+                            <th rowspan="2">Valor</th>
+                            <th rowspan="2">Data</th>
+                            <th rowspan="2">Situação</th>
+                            <th rowspan="2">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>[[${e.nome}]]</td>
+                            <td>[[${e.valor}]]</td>
+                            <td>[[${e.date}]]</td>
+                            <td class="status-content"><span class="status">[[${e.situacao.nome}]]</span></td>
+                            <td class="expense-action">
+                                <a class="editExpense"><i class="fa-solid fa-pen-to-square"></i></a>
+                                <a th:href="#"><i class="fa-regular fa-trash-can"></i></a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="expenseEmpty" th:unless="${expenseSize>0}">Você não tem compras cadastradas. <br>Por favor
+                Adicione uma compra!</p>
+            <div id="editExpenseModal" class="modal">
+                <div class="modal-content">
+                    <h1>Editar Despesa</h1>
+                    <form action="/updateExpense" method="post">
+                        <div class="input-field" style="flex-direction: row; align-items: center;">
+                            <label for="nome" style="text-align: start;">Nome</label>
+                            <input type="text" placeholder="Digite o nome" id="nome" name="nome" required>
+                        </div>
+                        <div class="input-field" style="flex-direction: row; align-items: center;">
+                            <label for="valor" style="text-align: start;">Valor</label>
+                            <input type="text" placeholder="Digite o valor" id="valor" name="valor" required>
+                        </div>
+                        <div class="input-field" style="flex-direction: row; align-items: center;">
+                            <label for="date" style="text-align: start;">Data</label>
+                            <input type="date" id="date" name="date" required>
+                        </div>
+                        <div class="input-field" style="flex-direction: row; align-items: center;">
+                            <label for="situacao" style="text-align: start;">Situação</label>
+                            <select name="situacao" id="situacao" required>
+                                <option value="A Pagar">A Pagar</option>
+                                <option value="Pago">Pago</option>
+                            </select>
+                        </div>
+                        <input type="hidden" name="id" id="id">
+                        <div class="expense-button">
+                            <button class="button">Salvar</button>
+                            <button type="reset" class="button close"
+                                style="background-color: white; color: #383e49; border: 1px solid #383e49;">Descartar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div id="addExpenseModal" class="modal">
+                <div class="modal-content">
+                    <h1>Despesa</h1>
+                    <form action="/addExpense" method="post">
+                        <div class="input-field" style="flex-direction: row; align-items: center;">
+                            <label for="nome" style="text-align: start;">Nome</label>
+                            <input type="text" autofocus placeholder="Digite o nome" id="nome" name="nome">
+                        </div>
+                        <div class="input-field" style="flex-direction: row; align-items: center;">
+                            <label for="valor" style="text-align: start;">Valor</label>
+                            <input type="text" placeholder="Digite o valor" id="valor" name="valor" required>
+                        </div>
+                        <div class="input-field" style="flex-direction: row; align-items: center;">
+                            <label for="date" style="text-align: start;">Data</label>
+                            <input type="date" id="date" name="date">
+                        </div>
+                        <div class="input-field" style="flex-direction: row; align-items: center;">
+                            <label for="situacao" style="text-align: start;">Situação</label>
+                            <select name="situacao" id="situacao">
+                                <option>Selecione</option>
+                                <option value="A Pagar">A Pagar</option>
+                                <option value="Pago">Pago</option>
+                            </select>
+                        </div>
+                        <input type="hidden" name="id">
+                        <div class="expense-button">
+                            <button class="button">Salvar</button>
+                            <button type="reset" class="button close"
+                                style="background-color: white;color: #383e49;border: 1px solid #383e49;">Descartar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="counterPages" th:if="${expenseSize>10}">
+            <a href=""><i class="fa-solid fa-chevron-left"></i> Anterior</a>
+            <a href="">1</a>
+            <a href="">Próximo <i class="fa-solid fa-chevron-right"></i></a>
+        </div>
+    </section>
+</body>
+
+</html>
