@@ -1,4 +1,4 @@
-package com.sys.gerenciador.config;
+package com.sys.gerenciador.security.handlers;
 
 import com.sys.gerenciador.model.Usuario;
 import com.sys.gerenciador.repository.IUserRepository;

@@ -1,5 +1,6 @@
-package com.sys.gerenciador.config;
+package com.sys.gerenciador.security.service;
 
+import com.sys.gerenciador.security.model.CustomUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

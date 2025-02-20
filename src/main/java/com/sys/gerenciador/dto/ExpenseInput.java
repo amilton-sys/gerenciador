@@ -1,4 +1,4 @@
-package com.sys.gerenciador.model.dto;
+package com.sys.gerenciador.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -11,7 +11,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 @Data
-public class ExpenseDTO {
+public class ExpenseInput {
     @NotBlank(message = "O Nome não pode estar em branco")
     private String nome;
     @NotNull

@@ -1,16 +1,15 @@
-package com.sys.gerenciador.config;
+package com.sys.gerenciador.security.model;
 
-import java.util.Collection;
-import java.util.List;
-
+import com.sys.gerenciador.model.Usuario;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.sys.gerenciador.model.Usuario;
+import java.util.Collection;
+import java.util.List;
 
 public class CustomUser implements UserDetails {
-    private Usuario usuario;
+    private final Usuario usuario;
 
     public CustomUser(Usuario usuario) {
         super();
@@ -34,18 +33,8 @@ public class CustomUser implements UserDetails {
     }
 
     @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
     public boolean isAccountNonLocked() {
         return usuario.getAccountNonLocked();
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
     }
 
     @Override

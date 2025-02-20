@@ -21,7 +21,7 @@ public class UserServiceImpl implements IUserService {
     private PasswordEncoder passwordEncoder;
 
     @Override
-    public Usuario saveUser(Usuario usuario) {
+    public void saveUser(Usuario usuario) {
         usuario.setRole("ROLE_USER");
         usuario.setIsEnable(true);
         usuario.setAccountNonLocked(true);
@@ -29,7 +29,7 @@ public class UserServiceImpl implements IUserService {
         String capitalizeFirstLetter = capitalizeFirstLetter(usuario.getName());
         usuario.setName(capitalizeFirstLetter);
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
-        return userRepository.save(usuario);
+        userRepository.save(usuario);
     }
 
     private String capitalizeFirstLetter(String text) {

@@ -1,44 +1,43 @@
 package com.sys.gerenciador.service.impl;
 
-import java.util.Optional;
-
+import com.sys.gerenciador.model.Expense;
+import com.sys.gerenciador.repository.IExpenseRepository;
 import com.sys.gerenciador.service.IRegisterExpenseService;
-import org.springframework.beans.BeanUtils;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
-import com.sys.gerenciador.model.Expense;
-import com.sys.gerenciador.repository.IExpenseRepository;
+import java.util.Optional;
 
 @Service
 public class RegisterExpenseImpl implements IRegisterExpenseService {
 
-    private final IExpenseRepository IExpenseRepository;
+    private final IExpenseRepository iExpenseRepository;
+    @PersistenceContext
+    private EntityManager entityManager;
 
-    public RegisterExpenseImpl(IExpenseRepository IExpenseRepository) {
-        this.IExpenseRepository = IExpenseRepository;
+    public RegisterExpenseImpl(IExpenseRepository iExpenseRepository) {
+        this.iExpenseRepository = iExpenseRepository;
     }
 
     @Override
+    @Transactional
     public Expense save(Expense expense) {
-        return IExpenseRepository.save(expense);
+        entityManager.detach(expense);
+        
+        return iExpenseRepository.save(expense);
     }
 
     @Override
     public void remove(Long id) {
-        IExpenseRepository.deleteById(id);
+        iExpenseRepository.deleteById(id);
     }
 
     @Override
-    public Expense edit(Long id, Expense newExpense) {
-        Optional<Expense> expenseDb = IExpenseRepository.findById(id);
-        Expense expense = null;
-        if (expenseDb.isPresent() && !ObjectUtils.isEmpty(expenseDb)) {
-            BeanUtils.copyProperties(newExpense, expenseDb.get(),"id");
-
-            expense = IExpenseRepository.save(expenseDb.get());
-        }
-        return expense;
+    public Optional<Expense> findById(Long id) {
+        return iExpenseRepository.findById(id);
     }
 
 }

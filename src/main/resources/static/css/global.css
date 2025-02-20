@@ -110,3 +110,11 @@ body {
 .status.a-pagar {
     color:rgba(253, 42, 5);
 }
+
+.text-center {
+    text-align: center;
+}
+.total-valor {
+    font-size: 30px;
+    color: #000;
+}
