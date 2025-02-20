@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ObjectUtils;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,6 +24,7 @@ import com.sys.gerenciador.util.CommonUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 
 @Controller
 public class HomeController {
@@ -72,10 +74,13 @@ public class HomeController {
     }
 
     @GetMapping("/addExpenses")
-    public String addExpenses(Model model, Principal p) {
+    public String loadExpenses(Model model, Principal p) {
+
+        model.addAttribute("expenseDTO", new ExpenseDTO());
 
         List<Expense> expenses = expenseRepository.findAll()
                 .stream()
+                .filter(expense -> expense.getDate() != null)
                 .sorted((o1, o2) -> o2.getDate().compareTo(o1.getDate()))
                 .toList();
 
@@ -97,7 +102,7 @@ public class HomeController {
             model.addAttribute("sobras", 0);
         }
 
-        return "/user/add_expenses";
+        return "user/add_expenses";
     }
 
     @GetMapping("/removeExpense")
@@ -119,14 +124,23 @@ public class HomeController {
 
     @GetMapping("/addShopping")
     public String addShopping() {
-        return "/user/add_shopping";
+        return "user/add_shopping";
     }
 
     @PostMapping("/addExpense")
-    public String postMethodName(@ModelAttribute ExpenseDTO expenseDTO) {
+    public String addExpense(@ModelAttribute @Valid ExpenseDTO expenseDTO, BindingResult bindingResult,
+            HttpSession session, Model model) {
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("expenseDTO", expenseDTO);
+            return "user/add_expenses";
+        }
+
         Expense expense = new Expense();
         BeanUtils.copyProperties(expenseDTO, expense);
+
         eRegisterExpense.save(expense);
+
         return "redirect:/addExpenses";
     }
 

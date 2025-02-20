@@ -10,7 +10,9 @@
         <div class="contabilizador">
             <div>
                 <h3 style="text-align: center;">Sobra</h3>
-                <p style="color: green; font-size: 24px;">[[${@commonUtils.formatCurrency(sobras)}]]</p>
+                <p th:if="${sobras != null}" style="color: green; font-size: 24px;">
+                    [[${@commonUtils.formatCurrency(sobras)}]]
+                </p>
             </div>
             <div class="contabilizador-salario">
                 <h3 style="text-align: center;">Salário</h3>
@@ -118,26 +120,30 @@
             <div id="addExpenseModal" class="modal">
                 <div class="modal-content">
                     <h1>Despesa</h1>
-                    <form action="/addExpense" method="post">
+                    <form action="/addExpense" method="post" th:object="${expenseDTO}">
                         <div class="input-field" style="flex-direction: row; align-items: center;">
                             <label for="nome" style="text-align: start;">Nome</label>
-                            <input type="text" autofocus placeholder="Digite o nome" id="nome" name="nome">
+                            <input type="text" autofocus placeholder="Digite o nome" id="nome" name="nome" th:field="*{nome}">
+                            <span th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}" style="color:red"></span>
                         </div>
                         <div class="input-field" style="flex-direction: row; align-items: center;">
                             <label for="valor" style="text-align: start;">Valor</label>
-                            <input type="text" placeholder="Digite o valor" id="valor" name="valor" required>
+                            <input type="text" placeholder="Digite o valor" id="valor" name="valor" th:field="*{valor}" required>
+                            <span th:if="${#fields.hasErrors('valor')}" th:errors="*{valor}" style="color:red"></span>
                         </div>
                         <div class="input-field" style="flex-direction: row; align-items: center;">
                             <label for="date" style="text-align: start;">Data</label>
-                            <input type="date" id="date" name="date">
+                            <input type="date" id="date" name="date" th:field="*{date}">
+                            <span th:if="${#fields.hasErrors('date')}" th:errors="*{date}" style="color:red"></span>
                         </div>
                         <div class="input-field" style="flex-direction: row; align-items: center;">
                             <label for="situacao" style="text-align: start;">Situação</label>
-                            <select name="situacao" id="situacao">
-                                <option>Selecione</option>
+                            <select name="situacao" id="situacao" th:field="*{situacao}">
+                                <option value="">Selecione</option>
                                 <option value="A Pagar">A Pagar</option>
                                 <option value="Pago">Pago</option>
                             </select>
+                            <span th:if="${#fields.hasErrors('situacao')}" th:errors="*{situacao}" style="color:red"></span>
                         </div>
                         <input type="hidden" name="id">
                         <div class="expense-button">

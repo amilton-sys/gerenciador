@@ -22,6 +22,12 @@ public class CommonUtils {
     }
 
     public String formatCurrency(BigDecimal value) {
+        if (value == null) {
+            return "R$ 0,00"; 
+        }
+        if (!(value instanceof Number)) {
+            throw new IllegalArgumentException("Valor inválido para formatação: " + value);
+        }
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
         return currencyFormat.format(value);
     }

@@ -25,9 +25,17 @@ public class UserServiceImpl implements IUserService {
         usuario.setIsEnable(true);
         usuario.setAccountNonLocked(true);
         usuario.setFailedAttempt(0);
-
+        String capitalizeFirstLetter = capitalizeFirstLetter(usuario.getName());
+        usuario.setName(capitalizeFirstLetter);
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         return userRepository.save(usuario);
+    }
+
+    private String capitalizeFirstLetter(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+        return text.substring(0, 1).toUpperCase() + text.substring(1);
     }
 
     @Override

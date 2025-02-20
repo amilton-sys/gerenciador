@@ -9,7 +9,6 @@ const modalAddAmountModal = document.getElementById("addAmountModal");
 const closeModalBtn = document.querySelectorAll(".close");
 
 
-
 if (addAmount) {
     addAmount.addEventListener("click", () => {
         modalAddAmountModal.style.display = "flex";
