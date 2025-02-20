@@ -1,7 +1,12 @@
 package com.sys.gerenciador.config;
 
-import java.io.IOException;
-
+import com.sys.gerenciador.model.Usuario;
+import com.sys.gerenciador.repository.IUserRepository;
+import com.sys.gerenciador.service.IUserService;
+import com.sys.gerenciador.util.AppConstant;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
@@ -9,14 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
 
-import com.sys.gerenciador.model.Usuario;
-import com.sys.gerenciador.repository.IUserRepository;
-import com.sys.gerenciador.service.IUserService;
-import com.sys.gerenciador.util.AppConstant;
-
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @Component
 public class AuthFailureHandlerImpl extends SimpleUrlAuthenticationFailureHandler {

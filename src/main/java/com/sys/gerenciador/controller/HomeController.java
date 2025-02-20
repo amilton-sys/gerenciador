@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import com.sys.gerenciador.model.Expense;
 import com.sys.gerenciador.model.Usuario;
 import com.sys.gerenciador.model.dto.ExpenseDTO;
-import com.sys.gerenciador.repository.ExpenseRepository;
+import com.sys.gerenciador.repository.IExpenseRepository;
 import com.sys.gerenciador.service.IRegisterExpenseService;
 import com.sys.gerenciador.service.IUserService;
 import com.sys.gerenciador.util.CommonUtils;
@@ -29,14 +29,14 @@ import jakarta.validation.Valid;
 @Controller
 public class HomeController {
 
-    private final ExpenseRepository expenseRepository;
+    private final IExpenseRepository IExpenseRepository;
     private final IRegisterExpenseService eRegisterExpense;
     private final IUserService userService;
     private final CommonUtils commonUtils;
 
-    public HomeController(ExpenseRepository expenseRepository, IRegisterExpenseService eRegisterExpense,
-            IUserService userService, CommonUtils commonUtils) {
-        this.expenseRepository = expenseRepository;
+    public HomeController(IExpenseRepository IExpenseRepository, IRegisterExpenseService eRegisterExpense,
+                          IUserService userService, CommonUtils commonUtils) {
+        this.IExpenseRepository = IExpenseRepository;
         this.eRegisterExpense = eRegisterExpense;
         this.userService = userService;
         this.commonUtils = commonUtils;
@@ -54,8 +54,8 @@ public class HomeController {
 
     @GetMapping("/")
     public String index(Model model) {
-        BigDecimal mesPassado = expenseRepository.amountExpensesPastMonth().orElse(BigDecimal.ZERO);
-        BigDecimal mesAtual = expenseRepository.amountExpensesActualMonth().orElse(BigDecimal.ZERO);
+        BigDecimal mesPassado = IExpenseRepository.amountExpensesPastMonth().orElse(BigDecimal.ZERO);
+        BigDecimal mesAtual = IExpenseRepository.amountExpensesActualMonth().orElse(BigDecimal.ZERO);
 
         model.addAttribute("dataThisWeek", List.of(mesAtual));
         model.addAttribute("dataLastWeek", List.of(mesPassado));
@@ -78,7 +78,7 @@ public class HomeController {
 
         model.addAttribute("expenseDTO", new ExpenseDTO());
 
-        List<Expense> expenses = expenseRepository.findAll()
+        List<Expense> expenses = IExpenseRepository.findAll()
                 .stream()
                 .filter(expense -> expense.getDate() != null)
                 .sorted((o1, o2) -> o2.getDate().compareTo(o1.getDate()))
@@ -87,7 +87,7 @@ public class HomeController {
         model.addAttribute("expenses", expenses);
         model.addAttribute("expenseSize", expenses.size());
 
-        BigDecimal totalDividas = expenseRepository.amountExpensesActualMonth().orElse(BigDecimal.ZERO);
+        BigDecimal totalDividas = IExpenseRepository.amountExpensesActualMonth().orElse(BigDecimal.ZERO);
 
         model.addAttribute("divida", totalDividas);
 
