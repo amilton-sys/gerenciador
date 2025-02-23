@@ -143,7 +143,20 @@ td {
     color: #000;
 }
 
-.counterPages>a:nth-of-type(2) {
+.counterPages>div>a {
+    text-decoration: none;
+    color: #000;
+    margin-left: 15px;
+}
+
+.disabled {
+    pointer-events: none; 
+    opacity: 0.5;
+    cursor: default;
+}
+
+
+.ativo {
     text-decoration: none;
     color: #000;
     background-color: #D0D3D9;

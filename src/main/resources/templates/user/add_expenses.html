@@ -126,13 +126,13 @@
                 </form>
             </div>
         </div>
-
-
-    </div>
-    <div class="counterPages" th:if="${expenseSize>5}">
-        <a href=""><i class="fa-solid fa-chevron-left"></i> Anterior</a>
-        <a href="">1</a>
-        <a href="">Próximo <i class="fa-solid fa-chevron-right"></i></a>
+        <div class="counterPages">
+            <a th:href="@{'/addExpenses?pageNumber='+${pageNumber-1}}" th:classappend="${isFirst} ? 'disabled' : ''"><i class="fa-solid fa-chevron-left"></i> Anterior</a>
+            <div>
+                <a th:href="@{'/addExpenses?pageNumber='+${i-1}}" th:text="${i}" th:classappend="${pageNumber+1==i} ? 'ativo':''" th:each="i:${#numbers.sequence(1,totalPages)}"></a>
+            </div>
+            <a th:href="@{'/addExpenses?pageNumber='+${pageNumber+1}}" th:classappend="${isLast} ? 'disabled' : ''">Próximo <i class="fa-solid fa-chevron-right"></i></a>
+        </div>
     </div>
 </section>
 </body>

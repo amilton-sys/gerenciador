@@ -12,6 +12,10 @@ import com.sys.gerenciador.util.CommonUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,6 +23,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
 import java.security.Principal;
@@ -75,13 +80,21 @@ public class HomeController {
     }
 
     @GetMapping("/addExpenses")
-    public String loadExpenses(Model model, Principal p) {
-        List<Expense> expenses = iExpenseRepository.findAll()
-                .stream()
-                .filter(expense -> expense.getDate() != null)
-                .sorted((o1, o2) -> o2.getDate().compareTo(o1.getDate()))
-                .toList();
+    public String loadExpenses(Model model, Principal p, @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber, 
+                               @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("date"));
+        Page<Expense> page = iExpenseRepository.findAll(pageable);
+
+        model.addAttribute("pageNumber", page.getNumber());
+        model.addAttribute("pageSize", pageSize);
+        model.addAttribute("totalElements", page.getTotalElements());
+        model.addAttribute("totalPages", page.getTotalPages());
+        model.addAttribute("isFirst", page.isFirst());
+        model.addAttribute("isLast", page.isLast());
         
+        List<Expense> expenses = page.getContent();
+                
+
 
         model.addAttribute("expenses", expenses);
         model.addAttribute("expenseSize", expenses.size());
@@ -92,13 +105,14 @@ public class HomeController {
 
         Usuario usuarioLogado = commonUtils.getLoggedInUser(p);
 
-        BigDecimal sobras = usuarioLogado.getSalario() != null ? usuarioLogado.getSalario().subtract(totalDividas)
-                : BigDecimal.ZERO;
+        BigDecimal salario = usuarioLogado.getSalario() != null ? usuarioLogado.getSalario() : BigDecimal.ZERO;
+        
+        BigDecimal sobras = salario.subtract(totalDividas);
 
         if (sobras.compareTo(BigDecimal.ZERO) > 0) {
             model.addAttribute("sobras", sobras);
         } else {
-            model.addAttribute("sobras", 0);
+            model.addAttribute("sobras", sobras.max(BigDecimal.ZERO));
         }
 
         return "user/add_expenses";
