@@ -1,5 +1,6 @@
-package com.sys.gerenciador.service;
+package com.sys.gerenciador.service.impl;
 
+import com.sys.gerenciador.service.ICommonService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 

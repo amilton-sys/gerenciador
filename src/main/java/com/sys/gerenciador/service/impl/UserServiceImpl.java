@@ -1,9 +1,10 @@
-package com.sys.gerenciador.service;
+package com.sys.gerenciador.service.impl;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import com.sys.gerenciador.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,14 +21,22 @@ public class UserServiceImpl implements IUserService {
     private PasswordEncoder passwordEncoder;
 
     @Override
-    public Usuario saveUser(Usuario usuario) {
+    public void saveUser(Usuario usuario) {
         usuario.setRole("ROLE_USER");
         usuario.setIsEnable(true);
         usuario.setAccountNonLocked(true);
         usuario.setFailedAttempt(0);
-
+        String capitalizeFirstLetter = capitalizeFirstLetter(usuario.getName());
+        usuario.setName(capitalizeFirstLetter);
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
-        return userRepository.save(usuario);
+        userRepository.save(usuario);
+    }
+
+    private String capitalizeFirstLetter(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+        return text.substring(0, 1).toUpperCase() + text.substring(1);
     }
 
     @Override

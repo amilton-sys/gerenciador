@@ -1,38 +1,48 @@
-const addExpense = document.querySelector("#addExpense");
-const editExpense = document.querySelector(".editExpense");
+const add = document.querySelector("#add");
+const edit = document.querySelectorAll(".edit");
 const addAmount = document.querySelector("#addAmount");
 
-const modalAddExpense = document.getElementById("addExpenseModal");
-const modalEditExpense = document.getElementById("editExpenseModal");
+const modalAdd = document.getElementById("addModal");
+const modalEdit = document.getElementById("editModal");
 const modalAddAmountModal = document.getElementById("addAmountModal");
 
 const closeModalBtn = document.querySelectorAll(".close");
 
-
-
+// Abre modal de adição de valor
 if (addAmount) {
     addAmount.addEventListener("click", () => {
         modalAddAmountModal.style.display = "flex";
     });
 }
 
-if (addExpense) {
-    addExpense.addEventListener("click", () => {
-        modalAddExpense.style.display = "flex";
+// Abre modal de adição
+if (add) {
+    add.addEventListener("click", () => {
+        modalAdd.style.display = "flex";
     });
 }
 
+// Abre modal de edição
+if (edit) {
+    edit.forEach(edit => {
+        edit.addEventListener("click", function () {
+            modalEdit.style.display = "flex";
+        });
+    });
+}
+
+// Fecha modal aberto
 closeModalBtn.forEach(btn => {
     btn.addEventListener("click", () => {
-        modalAddExpense.style.display = "none";
+        modalAdd.style.display = "none";
         modalAddAmountModal.style.display = "none";
-        modalEditExpense.style.display = "none";
+        modalEdit.style.display = "none";
     });
 });
 
 window.addEventListener("click", (event) => {
-    if (event.target === modalAddExpense || event.target === modalAddAmountModal) {
-        modalAddExpense.style.display = "none";
+    if (event.target === modalAdd || event.target === modalAddAmountModal) {
+        modalAdd.style.display = "none";
         modalAddAmountModal.style.display = "none";
     }
 });
@@ -61,7 +71,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 document.addEventListener("DOMContentLoaded", () => {
     const menus = document.querySelectorAll(".navigation-item");
-    console.log(menus);
 
     menus.forEach(category => {
         category.addEventListener("click", function () {
@@ -71,3 +80,23 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+
+document.addEventListener("DOMContentLoaded", function () {
+    const editButtons = document.querySelectorAll(".edit");
+
+    editButtons.forEach(button => {
+        button.addEventListener("click", function () {
+            const id = this.getAttribute("data-id");
+            const nome = this.getAttribute("data-name");
+            const valor = this.getAttribute("data-amount");
+            const date = this.getAttribute("data-date");
+            const situacao = this.getAttribute("data-situacao");
+
+            document.getElementById("idUpdate").value = id;
+            document.getElementById("nomeUpdate").value = nome;
+            document.getElementById("valorUpdate").value = valor;
+            document.getElementById("dateUpdate").value = date;
+            document.getElementById("situacaoUpdate").value = situacao === "PAGO" ? "Pago" : "A Pagar";
+        });
+    });
+});

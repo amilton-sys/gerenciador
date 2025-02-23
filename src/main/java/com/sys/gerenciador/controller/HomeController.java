@@ -1,10 +1,21 @@
 package com.sys.gerenciador.controller;
 
-import java.math.BigDecimal;
-import java.security.Principal;
-import java.util.List;
-
-import org.springframework.beans.BeanUtils;
+import com.sys.gerenciador.assembler.ExpenseInputDesassembler;
+import com.sys.gerenciador.dto.ExpenseComIdInput;
+import com.sys.gerenciador.dto.ExpenseInput;
+import com.sys.gerenciador.model.Expense;
+import com.sys.gerenciador.model.Usuario;
+import com.sys.gerenciador.repository.IExpenseRepository;
+import com.sys.gerenciador.service.IRegisterExpenseService;
+import com.sys.gerenciador.service.IUserService;
+import com.sys.gerenciador.util.CommonUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,32 +23,29 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import com.sys.gerenciador.model.Expense;
-import com.sys.gerenciador.model.Usuario;
-import com.sys.gerenciador.model.dto.ExpenseDTO;
-import com.sys.gerenciador.repository.ExpenseRepository;
-import com.sys.gerenciador.service.IRegisterExpenseService;
-import com.sys.gerenciador.service.IUserService;
-import com.sys.gerenciador.util.CommonUtils;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
+import java.math.BigDecimal;
+import java.security.Principal;
+import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class HomeController {
 
-    private final ExpenseRepository expenseRepository;
+    private final IExpenseRepository iExpenseRepository;
     private final IRegisterExpenseService eRegisterExpense;
     private final IUserService userService;
     private final CommonUtils commonUtils;
+    private final ExpenseInputDesassembler expenseInputDesassembler;
 
-    public HomeController(ExpenseRepository expenseRepository, IRegisterExpenseService eRegisterExpense,
-            IUserService userService, CommonUtils commonUtils) {
-        this.expenseRepository = expenseRepository;
+    public HomeController(IExpenseRepository iExpenseRepository, IRegisterExpenseService eRegisterExpense,
+                          IUserService userService, CommonUtils commonUtils, ExpenseInputDesassembler expenseInputDesassembler) {
+        this.iExpenseRepository = iExpenseRepository;
         this.eRegisterExpense = eRegisterExpense;
         this.userService = userService;
         this.commonUtils = commonUtils;
+        this.expenseInputDesassembler = expenseInputDesassembler;
     }
 
     @ModelAttribute
@@ -52,8 +60,8 @@ public class HomeController {
 
     @GetMapping("/")
     public String index(Model model) {
-        BigDecimal mesPassado = expenseRepository.amountExpensesPastMonth().orElse(BigDecimal.ZERO);
-        BigDecimal mesAtual = expenseRepository.amountExpensesActualMonth().orElse(BigDecimal.ZERO);
+        BigDecimal mesPassado = iExpenseRepository.amountExpensesPastMonth().orElse(BigDecimal.ZERO);
+        BigDecimal mesAtual = iExpenseRepository.amountExpensesActualMonth().orElse(BigDecimal.ZERO);
 
         model.addAttribute("dataThisWeek", List.of(mesAtual));
         model.addAttribute("dataLastWeek", List.of(mesPassado));
@@ -72,32 +80,42 @@ public class HomeController {
     }
 
     @GetMapping("/addExpenses")
-    public String addExpenses(Model model, Principal p) {
+    public String loadExpenses(Model model, Principal p, @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber, 
+                               @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("date"));
+        Page<Expense> page = iExpenseRepository.findAll(pageable);
 
-        List<Expense> expenses = expenseRepository.findAll()
-                .stream()
-                .sorted((o1, o2) -> o2.getDate().compareTo(o1.getDate()))
-                .toList();
+        model.addAttribute("pageNumber", page.getNumber());
+        model.addAttribute("pageSize", pageSize);
+        model.addAttribute("totalElements", page.getTotalElements());
+        model.addAttribute("totalPages", page.getTotalPages());
+        model.addAttribute("isFirst", page.isFirst());
+        model.addAttribute("isLast", page.isLast());
+        
+        List<Expense> expenses = page.getContent();
+                
+
 
         model.addAttribute("expenses", expenses);
         model.addAttribute("expenseSize", expenses.size());
 
-        BigDecimal totalDividas = expenseRepository.amountExpensesActualMonth().orElse(BigDecimal.ZERO);
+        BigDecimal totalDividas = iExpenseRepository.amountExpensesActualMonth().orElse(BigDecimal.ZERO);
 
         model.addAttribute("divida", totalDividas);
 
         Usuario usuarioLogado = commonUtils.getLoggedInUser(p);
 
-        BigDecimal sobras = usuarioLogado.getSalario() != null ? usuarioLogado.getSalario().subtract(totalDividas)
-                : BigDecimal.ZERO;
+        BigDecimal salario = usuarioLogado.getSalario() != null ? usuarioLogado.getSalario() : BigDecimal.ZERO;
+        
+        BigDecimal sobras = salario.subtract(totalDividas);
 
         if (sobras.compareTo(BigDecimal.ZERO) > 0) {
             model.addAttribute("sobras", sobras);
         } else {
-            model.addAttribute("sobras", 0);
+            model.addAttribute("sobras", sobras.max(BigDecimal.ZERO));
         }
 
-        return "/user/add_expenses";
+        return "user/add_expenses";
     }
 
     @GetMapping("/removeExpense")
@@ -107,8 +125,10 @@ public class HomeController {
     }
 
     @PostMapping("/updateExpense")
-    public String updateExpense(@ModelAttribute Expense expense, HttpSession session) {
-        Expense expenseEdited = eRegisterExpense.edit(expense.getId(), expense);
+    public String updateExpense(@ModelAttribute ExpenseComIdInput expenseComIdInput, HttpSession session) {
+        Optional<Expense> expenseOptional = eRegisterExpense.findById(expenseComIdInput.getId());
+        expenseInputDesassembler.copyToDomainObject(expenseComIdInput, expenseOptional.get());
+        Expense expenseEdited = eRegisterExpense.save(expenseOptional.get());
         if (!ObjectUtils.isEmpty(expenseEdited)) {
             session.setAttribute("succMsg", "Despesa atualizada com sucesso.");
         } else {
@@ -119,14 +139,16 @@ public class HomeController {
 
     @GetMapping("/addShopping")
     public String addShopping() {
-        return "/user/add_shopping";
+        return "user/add_shopping";
     }
 
     @PostMapping("/addExpense")
-    public String postMethodName(@ModelAttribute ExpenseDTO expenseDTO) {
-        Expense expense = new Expense();
-        BeanUtils.copyProperties(expenseDTO, expense);
+    public String addExpense(@ModelAttribute @Valid ExpenseInput expenseInput) {
+
+        Expense expense = expenseInputDesassembler.toDomainObject(expenseInput);
+
         eRegisterExpense.save(expense);
+
         return "redirect:/addExpenses";
     }
 

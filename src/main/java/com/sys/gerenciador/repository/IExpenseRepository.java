@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import com.sys.gerenciador.model.Expense;
 
 @Repository
-public interface ExpenseRepository extends JpaRepository<Expense, Long> {
+public interface IExpenseRepository extends JpaRepository<Expense, Long> {
 
     @Query(nativeQuery = true, value = "SELECT CAST(SUM(e.valor) AS DECIMAL(10,2)) FROM EXPENSE e WHERE YEAR(e.date) = YEAR(CURDATE()) AND MONTH(e.date) = MONTH(CURDATE())")
     Optional<BigDecimal> amountExpensesActualMonth();

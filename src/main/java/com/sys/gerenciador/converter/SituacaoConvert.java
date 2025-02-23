@@ -1,19 +1,16 @@
-package com.sys.gerenciador.Converters;
+package com.sys.gerenciador.converter;
 
+import com.sys.gerenciador.model.Situacao;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
-import com.sys.gerenciador.model.Situacao;
-
 @Component
 public class SituacaoConvert implements Converter<String, Situacao> {
 
-    @SuppressWarnings("null")
     @Override
-    @Nullable
     public Situacao convert(String source) {
-        if (source == null || source.isEmpty()) {
+        if (source.isBlank()) {
             return null;
         }
         for (Situacao situacao : Situacao.values()) {

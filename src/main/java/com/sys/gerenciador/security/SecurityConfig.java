@@ -1,5 +1,8 @@
-package com.sys.gerenciador.config;
+package com.sys.gerenciador.security;
 
+import com.sys.gerenciador.security.handlers.AuthFailureHandlerImpl;
+import com.sys.gerenciador.security.handlers.AuthSucessHandlerImpl;
+import com.sys.gerenciador.security.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
