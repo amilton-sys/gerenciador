@@ -6,135 +6,161 @@
 </head>
 
 <body>
-<section class="content" id="confetti-container">
-    <!-- Totalizador -->
-    <div class="contabilizador">
-        <div>
-            <h3 style="text-align: center;">Sobra</h3>
-            <p style="color: green; font-size: 24px;" th:text="${@currencyUtil.formatCurrency(sobras)}"></p>
+    <section class="content">
+        <!-- Loading -->
+        <div id="loading" class="loading-overlay">
+            <div class="spinner"></div>
         </div>
-        <div class="contabilizador-salario">
-            <h3 style="text-align: center;">Salário</h3>
+
+        <!-- Totalizador -->
+        <div class="contabilizador">
             <div>
-                <p style="font-size: 24px; color: #000;" th:text="${@currencyUtil.formatCurrency(user.salario)}"></p>
-                <a id="addAmount"><i class="fa-solid fa-pen"></i></a>
+                <h3 style="text-align: center;">Sobra</h3>
+                <div id="skeleton" class="skeleton-loader"></div>
+                <p id="addLeftovers" style="color: green; font-size: 24px;"></p>
+            </div>
+            <div class="contabilizador-salario">
+                <h3 style="text-align: center;">Salário</h3>
+                <div>
+                    <p id="salaryAmount" style="font-size: 24px; color: #000;"></p>
+                    <div id="skeleton" class="skeleton-loader"></div>
+                    <a id="addAmount"><i class="fa-solid fa-pen"></i></a>
+                </div>
+            </div>
+            <div>
+                <h3 style="text-align: center;">Dívidas</h3>
+                <div id="skeleton" class="skeleton-loader"></div>
+                <p id="addDebts" style="color:red;font-size: 24px;"></p>
             </div>
         </div>
-        <div>
-            <h3 style="text-align: center;">Dívidas</h3>
-            <p style="color:red;font-size: 24px;" th:text="${@currencyUtil.formatCurrency(divida)}"></p>
-        </div>
-    </div>
 
-    <!-- Modal Adicionar Salário -->
-    <div id="addAmountModal" class="modal">
-        <div class="modal-content">
-            <h1>Salário</h1>
-            <form th:action="@{/addAmount}" method="post" id="formAddAmount">
-                <div class="input-field" style="flex-direction: row; align-items: center;">
-                    <label for="valorAmount" style="text-align: start;">Valor</label>
-                    <input type="text" placeholder="Digite o valor" id="valorAmount" name="amountStr" required>
-                </div>
-                <div class="expense-button">
-                    <button class="button">Salvar</button>
-                    <button type="reset" class="button close"
-                            style="background-color: white;color: #383e49;border: 1px solid #383e49;">Descartar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Acionador do modal de Adicionar Despesa -->
-    <div class="expenses-menu">
-        <p>Despesas</p>
-        <button name="addExpense" id="add">Adicionar</button>
-    </div>
-
-    <!-- Modal Adicionar Despesa -->
-    <div id="addModal" class="modal">
-        <div class="modal-content">
-            <h1>Despesa</h1>
-            <form th:action="@{/addExpense}" method="post">
-                <div th:replace="~{fragments/components :: input-field('nome', 'Nome', 'text', 'nome', true, 'Digite o nome')}"></div>
-                <div th:replace="~{fragments/components :: input-field('valor', 'Valor', 'text', 'valor', true, 'Digite o valor')}"></div>
-                <div th:replace="~{fragments/components :: input-field('date', 'Data', 'date', 'date', true, '')}"></div>
-                <div th:replace="~{fragments/components :: select-situacao('situacao', 'situacao')}"></div>
-                <div class="expense-button">
-                    <button class="button">Salvar</button>
-                    <button type="reset" class="button close"
-                            style="background-color: white;color: #383e49;border: 1px solid #383e49;">Descartar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Lista de Despesas -->
-    <div class="expenses">
-        <div class="table" th:if="${expenseSize>0}">
-            <table>
-                <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Valor</th>
-                    <th>Data</th>
-                    <th>Situação</th>
-                    <th>Ação</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="e : ${expenses}">
-                    <td th:text="${e.nome}"></td>
-                    <td th:text="${e.valor}"></td>
-                    <td th:text="${#temporals.format(e.date, 'dd/MM/yyyy')}"></td>
-                    <td class="status-content">
-                        <span class="status" th:classappend="${e.situacao.nome == 'A Pagar' ? 'a-pagar' : 'pago'}"
-                              th:text="${e.situacao.nome}"></span>
-                    </td>
-                    <td class="expense-action">
-                        <a class="edit" data-bs-toggle="modal" data-bs-target="#editModal"
-                           th:data-id="${e.id}" th:data-name="${e.nome}" th:data-amount="${e.valor}"
-                           th:data-date="${e.date}" th:data-situacao="${e.situacao}"><i
-                                class="fa-solid fa-pen-to-square"></i></a>
-                        <a th:href="@{/removeExpense(id=${e.id})}"><i class="fa-regular fa-trash-can"></i></a>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <p class="expenseEmpty" th:unless="${expenseSize>0}">Você não tem despesas cadastradas. <br>Por favor, Adicione
-            uma Despesa!</p>
-
-        <!-- Modal de Edição de Despesa -->
-        <div id="edit" class="modal">
+        <!-- Modal Adicionar Salário -->
+        <div id="addAmountModal" class="modal">
             <div class="modal-content">
-                <h1>Editar Despesa</h1>
-                <form th:action="@{/updateExpense}" method="post">
-                    <div th:replace="~{fragments/components :: input-field('nomeUpdate', 'Nome', 'text', 'nome', true, 'Digite o nome')}"></div>
-                    <div th:replace="~{fragments/components :: input-field('valorUpdate', 'Valor', 'text', 'valor', true, 'Digite o valor')}"></div>
-                    <div th:replace="~{fragments/components :: input-field('dateUpdate', 'Data', 'date', 'date', true, '')}"></div>
-                    <div th:replace="~{fragments/components :: select-situacao('situacaoUpdate', 'situacao')}"></div>
-                    <input type="hidden" name="id" id="idUpdate">
+                <h1>Salário</h1>
+                <form id="formAddAmount">
+                    <div class="input-field" style="flex-direction: row; align-items: center;">
+                        <label for="valorAmount" style="text-align: start;">Valor</label>
+                        <input type="text" placeholder="Digite o valor" id="valorAmount" name="amountStr" required>
+                    </div>
+                    <span id="error-message" style="color: red; font-size: 14px; display: none;"></span>
                     <div class="expense-button">
-                        <button class="button">Salvar</button>
+                        <button class="button" type="submit">Salvar</button>
                         <button type="reset" class="button close"
-                                style="background-color: white; color: #383e49; border: 1px solid #383e49;">Descartar
+                            style="background-color: white;color: #383e49;border: 1px solid #383e49;">Descartar
                         </button>
                     </div>
                 </form>
             </div>
         </div>
-        <div class="counterPages">
-            <a th:href="@{'/addExpenses?pageNumber='+${pageNumber-1}}" th:classappend="${isFirst} ? 'disabled' : ''"><i class="fa-solid fa-chevron-left"></i> Anterior</a>
-            <div>
-                <a th:href="@{'/addExpenses?pageNumber='+${i-1}}" th:text="${i}" th:classappend="${pageNumber+1==i} ? 'ativo':''" th:each="i:${#numbers.sequence(1,totalPages)}"></a>
-            </div>
-            <a th:href="@{'/addExpenses?pageNumber='+${pageNumber+1}}" th:classappend="${isLast} ? 'disabled' : ''">Próximo <i class="fa-solid fa-chevron-right"></i></a>
+
+        <!-- Acionador do modal de Adicionar Despesa -->
+        <div class="expenses-menu">
+            <p>Despesas</p>
+            <button name="addExpense" id="add">Adicionar</button>
         </div>
-    </div>
-</section>
+
+        <!-- Modal Adicionar Despesa -->
+        <div id="addModal" class="modal">
+            <div class="modal-content">
+                <h1>Despesa</h1>
+                <form th:action="@{/addExpense}" method="post" id="despesaForm">
+                    <div
+                        th:replace="~{fragments/components :: input-field('nome', 'Nome', 'text', 'nome', true, 'Digite o nome')}">
+                    </div>
+                    <div
+                        th:replace="~{fragments/components :: input-field('valor', 'Valor', 'text', 'valor', true, 'Digite o valor')}">
+                    </div>
+                    <div th:replace="~{fragments/components :: input-field('date', 'Data', 'date', 'date', true, '')}">
+                    </div>
+                    <div th:replace="~{fragments/components :: select-situacao('situacao', 'situacao')}"></div>
+                    <div class="expense-button">
+                        <button class="button">Salvar</button>
+                        <button type="reset" class="button close"
+                            style="background-color: white;color: #383e49;border: 1px solid #383e49;">Descartar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Lista de Despesas -->
+        <div class="expenses">
+            <div class="table" th:if="${expenseSize>0}">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Valor</th>
+                            <th>Data</th>
+                            <th>Situação</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="e : ${expenses}">
+                            <td th:text="${e.nome}"></td>
+                            <td th:text="${e.valor}"></td>
+                            <td th:text="${#temporals.format(e.date, 'dd/MM/yyyy')}"></td>
+                            <td class="status-content">
+                                <span class="status"
+                                    th:classappend="${e.situacao.nome == 'A Pagar' ? 'a-pagar' : 'pago'}"
+                                    th:text="${e.situacao.nome}"></span>
+                            </td>
+                            <td class="expense-action">
+                                <a class="edit" data-bs-toggle="modal" data-bs-target="#edit" th:data-id="${e.id}"
+                                    th:data-name="${e.nome}" th:data-amount="${e.valor}" th:data-date="${e.date}"
+                                    th:data-situacao="${e.situacao}"><i class="fa-solid fa-pen-to-square"></i></a>
+                                <a th:href="@{/removeExpense(id=${e.id})}"><i class="fa-regular fa-trash-can"></i></a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+
+            <p class="expenseEmpty" th:unless="${expenseSize>0}">Você não tem despesas cadastradas. <br>Por favor,
+                Adicione
+                uma Despesa!</p>
+
+            <!-- Modal de Edição de Despesa -->
+            <div id="edit" class="modal">
+                <div class="modal-content">
+                    <h1>Editar Despesa</h1>
+                    <form th:action="@{/updateExpense}" method="post">
+                        <div
+                            th:replace="~{fragments/components :: input-field('nomeUpdate', 'Nome', 'text', 'nome', true, 'Digite o nome')}">
+                        </div>
+                        <div
+                            th:replace="~{fragments/components :: input-field('valorUpdate', 'Valor', 'text', 'valor', true, 'Digite o valor')}">
+                        </div>
+                        <div
+                            th:replace="~{fragments/components :: input-field('dateUpdate', 'Data', 'date', 'date', true, '')}">
+                        </div>
+                        <div th:replace="~{fragments/components :: select-situacao('situacaoUpdate', 'situacao')}">
+                        </div>
+                        <input type="hidden" name="id" id="idUpdate">
+                        <div class="expense-button">
+                            <button class="button">Salvar</button>
+                            <button type="reset" class="button close"
+                                style="background-color: white; color: #383e49; border: 1px solid #383e49;">Descartar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="counterPages">
+            <a th:href="@{'/addExpenses?pageNumber='+${pageNumber-1}}" th:classappend="${isFirst} ? 'disabled' : ''"><i
+                    class="fa-solid fa-chevron-left"></i> Anterior</a>
+            <div>
+                <a th:href="@{'/addExpenses?pageNumber='+${i-1}}" th:text="${i}"
+                    th:classappend="${pageNumber+1==i} ? 'ativo':''" th:each="i:${#numbers.sequence(1,totalPages)}"></a>
+            </div>
+            <a th:href="@{'/addExpenses?pageNumber='+${pageNumber+1}}"
+                th:classappend="${isLast} ? 'disabled' : ''">Próximo <i class="fa-solid fa-chevron-right"></i></a>
+        </div>
+    </section>
 </body>
 
 </html>

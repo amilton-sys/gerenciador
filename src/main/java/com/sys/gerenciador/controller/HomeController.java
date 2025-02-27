@@ -1,6 +1,31 @@
 package com.sys.gerenciador.controller;
 
+import java.math.BigDecimal;
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.repository.query.Param;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.util.ObjectUtils;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import com.sys.gerenciador.assembler.ExpenseInputDesassembler;
+import com.sys.gerenciador.dto.AmountInput;
 import com.sys.gerenciador.dto.ExpenseComIdInput;
 import com.sys.gerenciador.dto.ExpenseInput;
 import com.sys.gerenciador.model.Expense;
@@ -9,26 +34,10 @@ import com.sys.gerenciador.repository.IExpenseRepository;
 import com.sys.gerenciador.service.IRegisterExpenseService;
 import com.sys.gerenciador.service.IUserService;
 import com.sys.gerenciador.util.CommonUtils;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.util.ObjectUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import java.math.BigDecimal;
-import java.security.Principal;
-import java.util.List;
-import java.util.Optional;
 
 @Controller
 public class HomeController {
@@ -40,7 +49,7 @@ public class HomeController {
     private final ExpenseInputDesassembler expenseInputDesassembler;
 
     public HomeController(IExpenseRepository iExpenseRepository, IRegisterExpenseService eRegisterExpense,
-                          IUserService userService, CommonUtils commonUtils, ExpenseInputDesassembler expenseInputDesassembler) {
+            IUserService userService, CommonUtils commonUtils, ExpenseInputDesassembler expenseInputDesassembler) {
         this.iExpenseRepository = iExpenseRepository;
         this.eRegisterExpense = eRegisterExpense;
         this.userService = userService;
@@ -80,10 +89,24 @@ public class HomeController {
     }
 
     @GetMapping("/addExpenses")
-    public String loadExpenses(Model model, Principal p, @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber, 
-                               @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+    public String loadExpenses(Model model, Principal p,
+            @RequestParam(defaultValue = "0") Integer pageNumber,
+            @RequestParam(defaultValue = "6") Integer pageSize,
+            RedirectAttributes redirectAttributes) {
+
+        if (pageNumber < 0)
+            pageNumber = 0;
+        if (pageSize <= 0 || pageSize > 100)
+            pageSize = 10;
+
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("date"));
         Page<Expense> page = iExpenseRepository.findAll(pageable);
+
+        if (pageNumber >= page.getTotalPages() && page.getTotalPages() > 0) {
+            redirectAttributes.addAttribute("pageNumber", page.getTotalPages() - 1);
+            redirectAttributes.addAttribute("pageSize", pageSize);
+            return "redirect:/addExpenses";
+        }
 
         model.addAttribute("pageNumber", page.getNumber());
         model.addAttribute("pageSize", pageSize);
@@ -91,30 +114,13 @@ public class HomeController {
         model.addAttribute("totalPages", page.getTotalPages());
         model.addAttribute("isFirst", page.isFirst());
         model.addAttribute("isLast", page.isLast());
-        
-        List<Expense> expenses = page.getContent();
-                
 
+        List<Expense> expenses = page.getContent();
 
         model.addAttribute("expenses", expenses);
         model.addAttribute("expenseSize", expenses.size());
 
-        BigDecimal totalDividas = iExpenseRepository.amountExpensesActualMonth().orElse(BigDecimal.ZERO);
-
-        model.addAttribute("divida", totalDividas);
-
-        Usuario usuarioLogado = commonUtils.getLoggedInUser(p);
-
-        BigDecimal salario = usuarioLogado.getSalario() != null ? usuarioLogado.getSalario() : BigDecimal.ZERO;
         
-        BigDecimal sobras = salario.subtract(totalDividas);
-
-        if (sobras.compareTo(BigDecimal.ZERO) > 0) {
-            model.addAttribute("sobras", sobras);
-        } else {
-            model.addAttribute("sobras", sobras.max(BigDecimal.ZERO));
-        }
-
         return "user/add_expenses";
     }
 
@@ -125,7 +131,9 @@ public class HomeController {
     }
 
     @PostMapping("/updateExpense")
-    public String updateExpense(@ModelAttribute ExpenseComIdInput expenseComIdInput, HttpSession session) {
+    public String updateExpense(@ModelAttribute ExpenseComIdInput expenseComIdInput, HttpSession session,
+            BindingResult bindingResult) {
+
         Optional<Expense> expenseOptional = eRegisterExpense.findById(expenseComIdInput.getId());
         expenseInputDesassembler.copyToDomainObject(expenseComIdInput, expenseOptional.get());
         Expense expenseEdited = eRegisterExpense.save(expenseOptional.get());
@@ -165,27 +173,87 @@ public class HomeController {
     }
 
     @PostMapping("/addAmount")
-    public String addAmount(@ModelAttribute("amountStr") String amountStr, Principal p, HttpSession session) {
+    public ResponseEntity<Map<String, String>> addAmount(@RequestBody AmountInput amountInput, Principal p) {
+        Map<String, String> response = new HashMap<>();
+
         Usuario usuarioLogado = commonUtils.getLoggedInUser(p);
-        if (usuarioLogado != null) {
-            if (!amountStr.isBlank() && IsNumber(amountStr)) {
-                BigDecimal amount = new BigDecimal(amountStr.replace(",", "."));
-                usuarioLogado.setSalario(amount);
-                userService.saveUser(usuarioLogado);
-                session.setAttribute("succMsg", "Salário inserido com sucesso.");
-            } else {
-                session.setAttribute("errorMsg", "Preencha corretamente o valor.");
-            }
+        if (usuarioLogado == null) {
+            response.put("success", "false");
+            response.put("error", "Usuário não encontrado.");
+            return ResponseEntity.status(401).body(response);
         }
-        return "redirect:/addExpenses";
+
+        String amountStr = amountInput.getAmountStr();
+        if (amountStr == null || amountStr.isBlank() || !isValidNumber(amountStr)) {
+            response.put("success", "false");
+            response.put("error", "Preencha corretamente o valor.");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        BigDecimal amount = new BigDecimal(amountStr.replace(",", "."));
+        usuarioLogado.setSalario(amount);
+        userService.saveUser(usuarioLogado);
+
+        response.put("success", "true");
+        response.put("message", "Salário inserido com sucesso.");
+        return ResponseEntity.ok(response);
     }
 
-    private static boolean IsNumber(String str) {
-        try {
-            new BigDecimal(str);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
+    @GetMapping("/getSalary")
+    public ResponseEntity<Map<String, String>> getSalary(Principal p) {
+        Map<String, String> response = new HashMap<>();
+
+        Usuario usuarioLogado = commonUtils.getLoggedInUser(p);
+        if (usuarioLogado == null) {
+            response.put("error", "Usuário não encontrado.");
+            return ResponseEntity.status(401).body(response);
         }
+
+        BigDecimal salario = usuarioLogado.getSalario();
+
+        response.put("salary", salario.toString());
+        return ResponseEntity.ok(response);
+    }
+
+
+    @GetMapping("/getDebts")
+    public ResponseEntity<Map<String, String>> getDebts(Principal p) {
+        Map<String, String> response = new HashMap<>();
+
+        Usuario usuarioLogado = commonUtils.getLoggedInUser(p);
+        if (usuarioLogado == null) {
+            response.put("error", "Usuário não encontrado.");
+            return ResponseEntity.status(401).body(response);
+        }
+
+        BigDecimal totalDividas = iExpenseRepository.amountExpensesActualMonth().orElse(BigDecimal.ZERO);
+        response.put("debts", totalDividas.toString());
+        return ResponseEntity.ok(response);
+    }
+
+
+    @GetMapping("/getleftovers")
+    public ResponseEntity<Map<String, String>> getleftovers(Principal p){
+        Map<String, String> response = new HashMap<>();
+
+        Usuario usuarioLogado = commonUtils.getLoggedInUser(p);
+        if (usuarioLogado == null) {
+            response.put("error", "Usuário não encontrado.");
+            return ResponseEntity.status(401).body(response);
+        }
+
+        BigDecimal salario = usuarioLogado.getSalario() != null ? usuarioLogado.getSalario() : BigDecimal.ZERO;
+        BigDecimal totalDividas = iExpenseRepository.amountExpensesActualMonth().orElse(BigDecimal.ZERO);
+
+        BigDecimal sobras = salario.subtract(totalDividas);
+
+        response.put("leftovers", sobras.toString());
+        return ResponseEntity.ok(response);
+    }
+
+    
+
+    private static boolean isValidNumber(String value) {
+        return value.matches("^[0-9]+(\\.[0-9]{1,2})?$");
     }
 }
