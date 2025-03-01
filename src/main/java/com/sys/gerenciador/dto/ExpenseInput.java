@@ -3,6 +3,7 @@ package com.sys.gerenciador.dto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.sys.gerenciador.model.Situacao;
 
 import jakarta.validation.constraints.NotBlank;
@@ -18,6 +19,7 @@ public class ExpenseInput {
     @Positive(message = "O Valor não pode ser menor que R$ 1,00.")
     private BigDecimal valor;
     @NotNull(message = "O Data não pode estar vazia.")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate date;
     @NotNull(message = "A Situação não pode estar vazia.")
     private Situacao situacao;

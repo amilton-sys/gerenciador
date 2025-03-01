@@ -1,29 +1,5 @@
 package com.sys.gerenciador.controller;
 
-import java.math.BigDecimal;
-import java.security.Principal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.query.Param;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.util.ObjectUtils;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import com.sys.gerenciador.assembler.ExpenseInputDesassembler;
 import com.sys.gerenciador.dto.AmountInput;
 import com.sys.gerenciador.dto.ExpenseComIdInput;
@@ -34,10 +10,28 @@ import com.sys.gerenciador.repository.IExpenseRepository;
 import com.sys.gerenciador.service.IRegisterExpenseService;
 import com.sys.gerenciador.service.IUserService;
 import com.sys.gerenciador.util.CommonUtils;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.repository.query.Param;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.util.ObjectUtils;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.math.BigDecimal;
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Controller
 public class HomeController {
@@ -49,7 +43,7 @@ public class HomeController {
     private final ExpenseInputDesassembler expenseInputDesassembler;
 
     public HomeController(IExpenseRepository iExpenseRepository, IRegisterExpenseService eRegisterExpense,
-            IUserService userService, CommonUtils commonUtils, ExpenseInputDesassembler expenseInputDesassembler) {
+                          IUserService userService, CommonUtils commonUtils, ExpenseInputDesassembler expenseInputDesassembler) {
         this.iExpenseRepository = iExpenseRepository;
         this.eRegisterExpense = eRegisterExpense;
         this.userService = userService;
@@ -89,17 +83,17 @@ public class HomeController {
     }
 
     @GetMapping("/addExpenses")
-    public String loadExpenses(Model model, Principal p,
-            @RequestParam(defaultValue = "0") Integer pageNumber,
-            @RequestParam(defaultValue = "6") Integer pageSize,
-            RedirectAttributes redirectAttributes) {
+    public String loadExpenses(Model model,
+                               @RequestParam(defaultValue = "0") Integer pageNumber,
+                               @RequestParam(defaultValue = "6") Integer pageSize,
+                               RedirectAttributes redirectAttributes) {
 
         if (pageNumber < 0)
             pageNumber = 0;
         if (pageSize <= 0 || pageSize > 100)
             pageSize = 10;
 
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("date"));
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "date"));
         Page<Expense> page = iExpenseRepository.findAll(pageable);
 
         if (pageNumber >= page.getTotalPages() && page.getTotalPages() > 0) {
@@ -120,7 +114,7 @@ public class HomeController {
         model.addAttribute("expenses", expenses);
         model.addAttribute("expenseSize", expenses.size());
 
-        
+
         return "user/add_expenses";
     }
 
@@ -132,7 +126,7 @@ public class HomeController {
 
     @PostMapping("/updateExpense")
     public String updateExpense(@ModelAttribute ExpenseComIdInput expenseComIdInput, HttpSession session,
-            BindingResult bindingResult) {
+                                BindingResult bindingResult) {
 
         Optional<Expense> expenseOptional = eRegisterExpense.findById(expenseComIdInput.getId());
         expenseInputDesassembler.copyToDomainObject(expenseComIdInput, expenseOptional.get());
@@ -151,13 +145,20 @@ public class HomeController {
     }
 
     @PostMapping("/addExpense")
-    public String addExpense(@ModelAttribute @Valid ExpenseInput expenseInput) {
+    public ResponseEntity<Map<String, String>> addExpense(@RequestBody @Valid ExpenseInput expenseInput) {
+        Map<String, String> response = new HashMap<>();
+        try {
+            Expense expense = expenseInputDesassembler.toDomainObject(expenseInput);
+            eRegisterExpense.save(expense);
 
-        Expense expense = expenseInputDesassembler.toDomainObject(expenseInput);
-
-        eRegisterExpense.save(expense);
-
-        return "redirect:/addExpenses";
+            response.put("success", "true");
+            response.put("message", "Despesa adicionada com sucesso!");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", "false");
+            response.put("error", "Erro ao adicionar despesa.");
+            return ResponseEntity.status(500).body(response);
+        }
     }
 
     @PostMapping("/saveUser")
@@ -233,7 +234,7 @@ public class HomeController {
 
 
     @GetMapping("/getleftovers")
-    public ResponseEntity<Map<String, String>> getleftovers(Principal p){
+    public ResponseEntity<Map<String, String>> getleftovers(Principal p) {
         Map<String, String> response = new HashMap<>();
 
         Usuario usuarioLogado = commonUtils.getLoggedInUser(p);
@@ -251,7 +252,6 @@ public class HomeController {
         return ResponseEntity.ok(response);
     }
 
-    
 
     private static boolean isValidNumber(String value) {
         return value.matches("^[0-9]+(\\.[0-9]{1,2})?$");

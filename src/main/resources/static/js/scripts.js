@@ -1,13 +1,13 @@
 document.addEventListener("DOMContentLoaded", function () {
     // Elementos da página
     const formAddAmount = document.getElementById("formAddAmount");
-    const formAddExoense = document.getElementById("despesaForm");
+    const formAddExpense = document.getElementById("despesaForm");
     const inputAmount = document.getElementById("valorAmount");
     const errorMessage = document.getElementById("error-message");
     const salaryAmount = document.getElementById("salaryAmount");
     const debtsAmount = document.getElementById("addDebts");
     const leftoversAmount = document.getElementById("addLeftovers");
-    const skeleton = document.querySelectorAll("#skeleton");
+    const skeleton = document.querySelectorAll(".skeleton-loader");
 
     const modalAdd = document.getElementById("addModal");
     const modalEdit = document.getElementById("edit");
@@ -31,9 +31,9 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Evento para submissão do formulário
-    formAddExoense.addEventListener("submit", function (event) {
+    formAddExpense.addEventListener("submit", function (event) {
         event.preventDefault();
-        handleAddAmount();
+        handleAddExpense();
     });
 
     // Eventos para abrir e fechar modais
@@ -159,18 +159,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // Função para processar o envio do formulário de adição de despesa
-    function handleAddAmount() {
-        const amountStr = inputAmount.value.trim();
+    function handleAddExpense() {
+        const nome  = document.getElementById("nome").value.trim();
+        const valor  = document.getElementById("valor").value.trim();
+        const date  = document.getElementById("date").value.trim();
+        const situacao  = document.getElementById("situacao").value;
+        console.log({ nome, valor, date, situacao });
 
-        if (!isValidAmount(amountStr)) {
-            showError("Por favor, insira um valor numérico válido.");
+        if (!nome || !isValidAmount(valor) || !date || !situacao) {
+            showError("Preencha todos os campos corretamente.");
             return;
         }
-
-        fetch("/addAmount", {
+        
+        fetch("/addExpense", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ amountStr })
+            body: JSON.stringify({ nome, valor, date, situacao })
         })
             .then(response => {
                 if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
@@ -178,17 +182,15 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .then(result => {
                 if (result.success) {
-                    fetchSalary();
                     fetchDebts();
-                    fetchLeftTovers();
                     closeModal();
                 } else {
-                    showError(result.error || "Erro ao adicionar o salário.");
+                    showError(result.error || "Erro ao adicionar o expense.");
                 }
             })
             .catch(error => {
                 console.error("Erro ao enviar:", error);
-                showError("Erro inesperado ao tentar adicionar o salário.");
+                showError("Erro inesperado ao tentar adicionar o expense.");
             });
     }
 
@@ -206,7 +208,9 @@ document.addEventListener("DOMContentLoaded", function () {
     // Função para fechar modais
     function closeModal() {
         modalAddAmount.style.display = "none";
+        modalAdd.style.display = "none";
         formAddAmount.reset();
+        formAddExpense.reset();
         errorMessage.style.display = "none";
     }
 
