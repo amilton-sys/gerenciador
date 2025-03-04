@@ -17,7 +17,8 @@
         <div class="contabilizador-salario">
             <h1 style="text-align: center;">Total</h1>
             <div>
-                <p style="font-size: 35px; color: #000;">R$ 0,00</p>
+                <p id="amountShop" style="font-size: 35px; color: #000;">R$ 0,00</p>
+                <div class="skeleton-loader"></div>
             </div>
         </div>
     </div>
@@ -32,7 +33,7 @@
     <div id="addModal" class="modal">
         <div class="modal-content">
             <h1>Compra</h1>
-            <form th:action="@{/addShopping}" method="post">
+            <form id="addShopping">
                 <div th:replace="~{fragments/components :: input-field('nome', 'Nome', 'text', 'nome', true, 'Digite o nome')}"></div>
                 <div th:replace="~{fragments/components :: input-field('quantidade', 'Quantidade', 'text', 'nome', true, 'Digite a quantidade')}"></div>
                 <div th:replace="~{fragments/components :: input-field('valor', 'Valor unitário', 'text', 'valor', true, 'Digite o valor unitário')}"></div>
@@ -46,7 +47,7 @@
         </div>
     </div>
 
-    <!-- Lista de Despesas -->
+    <!-- Lista de Compras -->
     <div class="expenses">
         <div class="table" th:if="${expenseSize>0}">
             <table>
@@ -62,12 +63,8 @@
                 <tbody>
                 <tr th:each="e : ${expenses}">
                     <td th:text="${e.nome}"></td>
+                    <td th:text="${e.quantidade}"></td>
                     <td th:text="${e.valor}"></td>
-                    <td th:text="${#temporals.format(e.date, 'dd/MM/yyyy')}"></td>
-                    <td class="status-content">
-                        <span class="status" th:classappend="${e.situacao.nome == 'A Pagar' ? 'a-pagar' : 'pago'}"
-                              th:text="${e.situacao.nome}"></span>
-                    </td>
                     <td class="expense-action">
                         <a class="edit" data-bs-toggle="modal" data-bs-target="#editModal"
                            th:data-id="${e.id}" th:data-name="${e.nome}" th:data-amount="${e.valor}"
@@ -83,7 +80,7 @@
         <p class="expenseEmpty" th:unless="${expenseSize>0}">Você não tem compras cadastradas. <br>Por favor, Adicione
             uma Compra!</p>
 
-        <!-- Modal de Edição de Despesa -->
+        <!-- Modal de Edição de Compra -->
         <div id="edit" class="modal">
             <div class="modal-content">
                 <h1>Editar Compra</h1>

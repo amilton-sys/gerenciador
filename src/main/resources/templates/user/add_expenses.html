@@ -151,7 +151,7 @@
                 </div>
             </div>
         </div>
-        <div class="counterPages">
+        <div class="counterPages" th:if="${expenseSize>0}">
             <a th:href="@{'/addExpenses?pageNumber='+${pageNumber-1}}" th:classappend="${isFirst} ? 'disabled' : ''"><i
                     class="fa-solid fa-chevron-left"></i> Anterior</a>
             <div>

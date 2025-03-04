@@ -2,12 +2,16 @@ document.addEventListener("DOMContentLoaded", function () {
     // Elementos da página
     const formAddAmount = document.getElementById("formAddAmount");
     const formAddExpense = document.getElementById("despesaForm");
+    const formAddShopping = document.getElementById("addShopping");
+    
     const inputAmount = document.getElementById("valorAmount");
-    const errorMessage = document.getElementById("error-message");
     const salaryAmount = document.getElementById("salaryAmount");
     const debtsAmount = document.getElementById("addDebts");
     const leftoversAmount = document.getElementById("addLeftovers");
+    
     const skeleton = document.querySelectorAll(".skeleton-loader");
+    const errorMessage = document.getElementById("error-message");
+
 
     const modalAdd = document.getElementById("addModal");
     const modalEdit = document.getElementById("edit");
@@ -25,16 +29,22 @@ document.addEventListener("DOMContentLoaded", function () {
     fetchLeftTovers();
 
     // Evento para submissão do formulário
-    formAddAmount.addEventListener("submit", function (event) {
+    formAddAmount.addEventListener("submit", (event) => {
         event.preventDefault();
         handleAddAmount();
     });
 
     // Evento para submissão do formulário
-    formAddExpense.addEventListener("submit", function (event) {
+    formAddExpense.addEventListener("submit", (event) => {
         event.preventDefault();
         handleAddExpense();
     });
+
+    // formAddShopping.addEventListener("submit",(event) => {
+    //     event.preventDefault();
+    //     handleAddShopping();
+    // });
+
 
     // Eventos para abrir e fechar modais
     setupModalEvents();
@@ -184,6 +194,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (result.success) {
                     fetchDebts();
                     closeModal();
+                    location.reload();
                 } else {
                     showError(result.error || "Erro ao adicionar o expense.");
                 }
@@ -191,6 +202,40 @@ document.addEventListener("DOMContentLoaded", function () {
             .catch(error => {
                 console.error("Erro ao enviar:", error);
                 showError("Erro inesperado ao tentar adicionar o expense.");
+            });
+    }
+
+    function handleAddShopping() {
+        const nome  = document.getElementById("nome").value.trim();
+        const quantidade  = document.getElementById("quantidade").value.trim();
+        const valor  = document.getElementById("valor").value.trim();
+
+
+        if (!nome || !isValidAmount(valor) || !quantidade) {
+            showError("Preencha todos os campos corretamente.");
+            return;
+        }
+        
+        fetch("/addShopping", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nome, quantidade, valor })
+        })
+            .then(response => {
+                if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+                return response.text().then(text => text ? JSON.parse(text) : {});
+            })
+            .then(result => {
+                if (result.success) {
+                    closeModal();
+                    location.reload();
+                } else {
+                    showError(result.error || "Erro ao adicionar o shopping.");
+                }
+            })
+            .catch(error => {
+                console.error("Erro ao enviar:", error);
+                showError("Erro inesperado ao tentar adicionar o shopping.");
             });
     }
 

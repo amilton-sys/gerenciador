@@ -1,12 +1,16 @@
 package com.sys.gerenciador.controller;
 
 import com.sys.gerenciador.assembler.ExpenseInputDesassembler;
+import com.sys.gerenciador.assembler.ShoppingInputDesassembler;
 import com.sys.gerenciador.dto.AmountInput;
 import com.sys.gerenciador.dto.ExpenseComIdInput;
 import com.sys.gerenciador.dto.ExpenseInput;
+import com.sys.gerenciador.dto.ShoppingInput;
 import com.sys.gerenciador.model.Expense;
+import com.sys.gerenciador.model.Shopping;
 import com.sys.gerenciador.model.Usuario;
 import com.sys.gerenciador.repository.IExpenseRepository;
+import com.sys.gerenciador.service.IGenericService;
 import com.sys.gerenciador.service.IRegisterExpenseService;
 import com.sys.gerenciador.service.IUserService;
 import com.sys.gerenciador.util.CommonUtils;
@@ -37,18 +41,22 @@ import java.util.Optional;
 public class HomeController {
 
     private final IExpenseRepository iExpenseRepository;
-    private final IRegisterExpenseService eRegisterExpense;
+    private final IRegisterExpenseService iRegisterExpenseService;
+    private final IGenericService<Shopping> shoppingIGenericService;
     private final IUserService userService;
     private final CommonUtils commonUtils;
     private final ExpenseInputDesassembler expenseInputDesassembler;
+    private final ShoppingInputDesassembler shoppingInputDesassemble;
 
-    public HomeController(IExpenseRepository iExpenseRepository, IRegisterExpenseService eRegisterExpense,
-                          IUserService userService, CommonUtils commonUtils, ExpenseInputDesassembler expenseInputDesassembler) {
+    public HomeController(IExpenseRepository iExpenseRepository, IRegisterExpenseService iRegisterExpenseService, IGenericService<Shopping> shoppingIGenericService,
+                          IUserService userService, CommonUtils commonUtils, ExpenseInputDesassembler expenseInputDesassembler, ShoppingInputDesassembler shoppingInputDesassemble) {
         this.iExpenseRepository = iExpenseRepository;
-        this.eRegisterExpense = eRegisterExpense;
+        this.iRegisterExpenseService = iRegisterExpenseService;
+        this.shoppingIGenericService = shoppingIGenericService;
         this.userService = userService;
         this.commonUtils = commonUtils;
         this.expenseInputDesassembler = expenseInputDesassembler;
+        this.shoppingInputDesassemble = shoppingInputDesassemble;
     }
 
     @ModelAttribute
@@ -85,7 +93,7 @@ public class HomeController {
     @GetMapping("/addExpenses")
     public String loadExpenses(Model model,
                                @RequestParam(defaultValue = "0") Integer pageNumber,
-                               @RequestParam(defaultValue = "6") Integer pageSize,
+                               @RequestParam(defaultValue = "10") Integer pageSize,
                                RedirectAttributes redirectAttributes) {
 
         if (pageNumber < 0)
@@ -120,7 +128,7 @@ public class HomeController {
 
     @GetMapping("/removeExpense")
     public String removeExpense(@Param("id") Long id) {
-        eRegisterExpense.remove(id);
+        iRegisterExpenseService.remove(id);
         return "redirect:/addExpenses";
     }
 
@@ -128,9 +136,9 @@ public class HomeController {
     public String updateExpense(@ModelAttribute ExpenseComIdInput expenseComIdInput, HttpSession session,
                                 BindingResult bindingResult) {
 
-        Optional<Expense> expenseOptional = eRegisterExpense.findById(expenseComIdInput.getId());
+        Optional<Expense> expenseOptional = iRegisterExpenseService.findById(expenseComIdInput.getId());
         expenseInputDesassembler.copyToDomainObject(expenseComIdInput, expenseOptional.get());
-        Expense expenseEdited = eRegisterExpense.save(expenseOptional.get());
+        Expense expenseEdited = iRegisterExpenseService.save(expenseOptional.get());
         if (!ObjectUtils.isEmpty(expenseEdited)) {
             session.setAttribute("succMsg", "Despesa atualizada com sucesso.");
         } else {
@@ -149,7 +157,7 @@ public class HomeController {
         Map<String, String> response = new HashMap<>();
         try {
             Expense expense = expenseInputDesassembler.toDomainObject(expenseInput);
-            eRegisterExpense.save(expense);
+            iRegisterExpenseService.save(expense);
 
             response.put("success", "true");
             response.put("message", "Despesa adicionada com sucesso!");
@@ -157,6 +165,23 @@ public class HomeController {
         } catch (Exception e) {
             response.put("success", "false");
             response.put("error", "Erro ao adicionar despesa.");
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @PostMapping("/addShopping")
+    public ResponseEntity<Map<String, String>> addShopping(@RequestBody @Valid ShoppingInput shoppingInput) {
+        Map<String, String> response = new HashMap<>();
+        try {
+            Shopping shopping = shoppingInputDesassemble.toDomainObject(shoppingInput);
+            shoppingIGenericService.save(shopping);
+
+            response.put("success", "true");
+            response.put("message", "Shopping adicionada com sucesso!");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", "false");
+            response.put("error", "Erro ao adicionar shopping.");
             return ResponseEntity.status(500).body(response);
         }
     }
