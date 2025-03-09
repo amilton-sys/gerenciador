@@ -41,8 +41,9 @@ git clone https://github.com/seu-usuario/gerenciador.git
 DB_HOST=localhost
 DB_USERNAME=root
 DB_PASSWORD=root
-DB_DDL_AUTO=update
-
+DB_DDL_AUTO=update 
+//Caso queira usar o import.sql que já existe no projeto coloque como create
+DB_DDL_AUTO=update 
 MAIL_HOST=smtp.gmail.com
 MAIL_USERNAME=seu-email@gmail.com
 MAIL_PASSWORD=sua-senha

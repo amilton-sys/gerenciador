@@ -231,15 +231,7 @@ public class HomeController {
     public String addShopping() {
         return "user/add_shopping";
     }
-
-    @GetMapping("/getTotalShopping")
-    public BigDecimal getTotalShopping() {
-        LocalDate startDate = LocalDate.now().withDayOfMonth(1);
-        LocalDate endDate = LocalDate.now();
-        return iShoppingRepository.amountShoppingActualMonth(startDate, endDate).orElse(BigDecimal.ZERO);
-    }
     
-
     @PostMapping("/addShopping")
     public ResponseEntity<Map<String, String>> addShopping(@RequestBody @Valid ShoppingInput shoppingInput) {
         Map<String, String> response = new HashMap<>();
