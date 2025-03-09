@@ -35,7 +35,7 @@
 .input-field {
     display: flex;
     width: 400px;
-    height: 80px;
+    height: 100px;
     flex-direction: column;
 }
 
@@ -43,6 +43,7 @@
     width: 400px;
     font-size: 16px;
     font-weight: 400;
+    margin-bottom: 5px;
 }
 
 .input-field>input {

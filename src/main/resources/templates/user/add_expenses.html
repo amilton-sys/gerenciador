@@ -7,6 +7,7 @@
 
 <body>
     <section class="content">
+        <span class="erro" style="display: none;"></span>
         <!-- Loading -->
         <div id="loading" class="loading-overlay">
             <div class="spinner"></div>
@@ -39,11 +40,11 @@
             <div class="modal-content">
                 <h1>Salário</h1>
                 <form id="formAddAmount">
-                    <div class="input-field" style="flex-direction: row; align-items: center;">
-                        <label for="valorAmount" style="text-align: start;">Valor</label>
-                        <input type="text" placeholder="Digite o valor" id="valorAmount" name="amountStr" required>
+                    <div class="input-field" style="flex-direction: column; align-items: center;">
+                        <label for="valorAmount" style="text-align: start; margin-bottom: 5px;">Valor</label>
+                        <input type="text" placeholder="Digite o valor" id="valorAmount" name="amountStr"
+                            data-validate="required|money">
                     </div>
-                    <span id="error-message" style="color: red; font-size: 14px; display: none;"></span>
                     <div class="expense-button">
                         <button class="button" type="submit">Salvar</button>
                         <button type="reset" class="button close"
@@ -65,15 +66,13 @@
             <div class="modal-content">
                 <h1>Despesa</h1>
                 <form id="despesaForm">
-                    <span id="error-message" style="color: red; font-size: 14px; display: none;"></span>
                     <div
-                        th:replace="~{fragments/components :: input-field('nome', 'Nome', 'text', 'nome', true, 'Digite o nome')}">
+                        th:replace="~{fragments/components :: input-field('nome', 'Nome', 'text', 'nome', false, 'Digite o nome')}">
                     </div>
                     <div
-                        th:replace="~{fragments/components :: input-field('valor', 'Valor', 'text', 'valor', true, 'Digite o valor')}">
+                        th:replace="~{fragments/components :: input-field('valor', 'Valor', 'text', 'valor', false, 'Digite o valor')}">
                     </div>
-                    <div th:replace="~{fragments/components :: input-field('date', 'Data', 'date', 'date', true, '')}">
-                    </div>
+                    <div th:replace="~{fragments/components :: input-field('date', 'Data', 'date', 'date', false, '')}"></div>
                     <div th:replace="~{fragments/components :: select-situacao('situacao', 'situacao')}"></div>
                     <div class="expense-button">
                         <button class="button">Salvar</button>
@@ -109,9 +108,7 @@
                                     th:text="${e.situacao.nome}"></span>
                             </td>
                             <td class="expense-action">
-                                <a class="edit" data-bs-toggle="modal" data-bs-target="#edit" th:data-id="${e.id}"
-                                    th:data-name="${e.nome}" th:data-amount="${e.valor}" th:data-date="${e.date}"
-                                    th:data-situacao="${e.situacao}"><i class="fa-solid fa-pen-to-square"></i></a>
+                                <a class="edit" th:data-id="${e.id}"><i class="fa-solid fa-pen-to-square"></i></a>
                                 <a th:href="@{/removeExpense(id=${e.id})}"><i class="fa-regular fa-trash-can"></i></a>
                             </td>
                         </tr>
@@ -128,7 +125,7 @@
             <div id="edit" class="modal">
                 <div class="modal-content">
                     <h1>Editar Despesa</h1>
-                    <form th:action="@{/updateExpense}" method="post">
+                    <form id="editExpense">
                         <div
                             th:replace="~{fragments/components :: input-field('nomeUpdate', 'Nome', 'text', 'nome', true, 'Digite o nome')}">
                         </div>

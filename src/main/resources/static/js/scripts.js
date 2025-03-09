@@ -1,50 +1,66 @@
+import { FormValidator } from "./validator.js";
+
 document.addEventListener("DOMContentLoaded", function () {
     // Elementos da página
     const formAddAmount = document.getElementById("formAddAmount");
     const formAddExpense = document.getElementById("despesaForm");
-    const formAddShopping = document.getElementById("addShopping");
-    
+    const formEditExpense = document.getElementById("editExpense");
+
     const inputAmount = document.getElementById("valorAmount");
     const salaryAmount = document.getElementById("salaryAmount");
     const debtsAmount = document.getElementById("addDebts");
     const leftoversAmount = document.getElementById("addLeftovers");
-    
+
     const skeleton = document.querySelectorAll(".skeleton-loader");
-    const errorMessage = document.getElementById("error-message");
+    const errorMessage = document.querySelector(".error");
 
 
     const modalAdd = document.getElementById("addModal");
-    const modalEdit = document.getElementById("edit");
+    const modalEdit = document.querySelector("#edit");
     const modalAddAmount = document.getElementById("addAmountModal");
 
     const btnAdd = document.querySelector("#add");
     const btnAddAmount = document.querySelector("#addAmount");
     const btnCloseModals = document.querySelectorAll(".close");
 
-    // Inicializa o salário
-    fetchSalary();
-    // Inicializa o débitos
-    fetchDebts();
-    // Inicializa o sobras
-    fetchLeftTovers();
+    if (salaryAmount) {
+        // Inicializa o salário
+        fetchSalary();
+        // Inicializa o débitos
+        fetchDebts();
+        // Inicializa o sobras
+        fetchLeftTovers();
+    }
 
-    // Evento para submissão do formulário
-    formAddAmount.addEventListener("submit", (event) => {
-        event.preventDefault();
-        handleAddAmount();
-    });
+    fetchTotalShopping();
 
-    // Evento para submissão do formulário
-    formAddExpense.addEventListener("submit", (event) => {
-        event.preventDefault();
-        handleAddExpense();
-    });
+    if (salaryAmount) {
+        // Evento para submissão do formulário
+        const validator = new FormValidator(formAddAmount);
+        formAddAmount.addEventListener("submit", function (event) {
+            if (validator.isFormValid()) {
+                handleAddAmount();
+            }
+            event.preventDefault();
+        });
 
-    // formAddShopping.addEventListener("submit",(event) => {
-    //     event.preventDefault();
-    //     handleAddShopping();
-    // });
+        formAddAmount.addEventListener("input", function (event) {
+            if (event.target.dataset.validate) {
+                validator.validateField(event.target);
+            }
+        });
 
+        // Evento para submissão do formulário
+        formAddExpense.addEventListener("submit", (event) => {
+            event.preventDefault();
+            handleAddExpense();
+        });
+
+        formEditExpense.addEventListener("submit", (event) => {
+            event.preventDefault();
+            handleUpdateExpense();
+        })
+    }
 
     // Eventos para abrir e fechar modais
     setupModalEvents();
@@ -54,172 +70,170 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Função para exibir ou ocultar o loader do salário
     function toggleSkeletonLoader(isLoading) {
-        salaryAmount.style.display = isLoading ? "none" : "block";
-        debtsAmount.style.display = isLoading ? "none" : "block";
-        leftoversAmount.style.display = isLoading ? "none" : "block";
+        const elementsToHide = [salaryAmount, debtsAmount, leftoversAmount];
+        const displayState = isLoading ? "none" : "block";
+
+        elementsToHide.forEach(el => {
+            if (el) el.style.display = displayState;
+        });
+
         skeleton.forEach(sk => {
             sk.style.display = isLoading ? "block" : "none";
-        })
+        });
     }
+
 
     // Função para buscar o salário no servidor
     function fetchSalary() {
-        toggleSkeletonLoader(true);
-        fetch("/getSalary")
-            .then(response => response.json())
+        fetchData("/getSalary")
             .then(data => {
-                const salary = data.salary || 0.00;
-                setSalaryDisplay(salary);
+                const dados = data.salary || 0.00;
+                setAmountDisplay(dados, salaryAmount);
             })
             .catch(error => {
-                console.error("Erro ao obter salário:", error);
-                salaryAmount.textContent = "Erro ao carregar";
+                console.log("Erro ao buscar salary", error);
             })
-            .finally(() => toggleSkeletonLoader(false));
+    }
+
+    function fetchTotalShopping() {
+        const totalShoppingAmount = document.getElementById("amountShop");
+        fetchData("/getTotalShopping")
+            .then(data => {
+                const dados = data.totalShopping || 0.00;
+                setAmountDisplay(dados, totalShoppingAmount);
+            })
+            .catch(error => {
+                console.log("Erro ao buscar totalShopping", error);
+            })
     }
 
     // Função para buscar as dividas no servidor
     function fetchDebts() {
-        toggleSkeletonLoader(true);
-        fetch("/getDebts")
-            .then(response => response.json())
+        fetchData("/getDebts")
             .then(data => {
-                const debt = data.debts || 0.00;
-                setDebtDisplay(debt);
+                const dados = data.debts || 0.00;
+                setAmountDisplay(dados, debtsAmount);
             })
             .catch(error => {
-                console.error("Erro ao obter débitos:", error);
+                console.log("Erro ao buscar debitos", error);
             })
-            .finally(() => toggleSkeletonLoader(false));
     }
 
     // Função para buscar as sobras no servidor
     function fetchLeftTovers() {
-        toggleSkeletonLoader(true);
-        fetch("/getleftovers")
-            .then(response => response.json())
+        fetchData("/getleftovers")
             .then(data => {
-                const leftovers = data.leftovers || 0.00;
-                setLeftOversDisplay(leftovers);
+                const dados = data.leftovers || 0.00;
+                setAmountDisplay(dados, leftoversAmount);
             })
             .catch(error => {
-                console.error("Erro ao obter sobras:", error);
+                console.log("Erro ao buscar sobras", error);
+            })
+    }
+
+
+    function fetchData(path) {
+        toggleSkeletonLoader(true);
+        return fetch(path)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Erro na requisição: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .catch(error => {
+                console.log("Erro ao obter dados:", error);
+                return null;
             })
             .finally(() => toggleSkeletonLoader(false));
     }
 
 
-    // Função para formatar e exibir o salário
-    function setSalaryDisplay(value) {
-        salaryAmount.textContent = new Intl.NumberFormat('pt-BR', {
+    // Função para formatar e exibir valores monetários
+    function setAmountDisplay(value, element) {
+        element.textContent = new Intl.NumberFormat('pt-BR', {
             style: 'currency',
             currency: 'BRL'
         }).format(value);
     }
 
-    // Função para formatar e exibir o salário
-    function setDebtDisplay(value) {
-        debtsAmount.textContent = new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-        }).format(value);
-    }
-
-     // Função para formatar e exibir o salário
-     function setLeftOversDisplay(value) {
-        leftoversAmount.textContent = new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-        }).format(value);
-    }
 
     // Função para processar o envio do formulário de adição de amount
     function handleAddAmount() {
-        const amountStr = inputAmount.value.trim();
-
-        if (!isValidAmount(amountStr)) {
-            showError("Por favor, insira um valor numérico válido.");
-            return;
-        }
+        const amount = inputAmount.value.trim();
 
         fetch("/addAmount", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ amountStr })
+            body: JSON.stringify({ amount })
         })
             .then(response => {
-                if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
                 return response.text().then(text => text ? JSON.parse(text) : {});
             })
             .then(result => {
                 if (result.success) {
+                    showMessage(result);
                     fetchSalary();
                     fetchDebts();
                     fetchLeftTovers();
                     closeModal();
                 } else {
-                    showError(result.error || "Erro ao adicionar o salário.");
+                    showMessage(result);
                 }
             })
             .catch(error => {
                 console.error("Erro ao enviar:", error);
-                showError("Erro inesperado ao tentar adicionar o salário.");
             });
     }
 
 
     // Função para processar o envio do formulário de adição de despesa
     function handleAddExpense() {
-        const nome  = document.getElementById("nome").value.trim();
-        const valor  = document.getElementById("valor").value.trim();
-        const date  = document.getElementById("date").value.trim();
-        const situacao  = document.getElementById("situacao").value;
-        console.log({ nome, valor, date, situacao });
+        const nome = document.getElementById("nome").value.trim();
+        const valor = document.getElementById("valor").value.trim();
+        const date = document.getElementById("date").value.trim();
+        const situacao = document.getElementById("situacao").value;
 
-        if (!nome || !isValidAmount(valor) || !date || !situacao) {
-            showError("Preencha todos os campos corretamente.");
-            return;
-        }
-        
+        console.log("PASSOU AQUI handleAddExpense");
+
         fetch("/addExpense", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ nome, valor, date, situacao })
         })
             .then(response => {
-                if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
                 return response.text().then(text => text ? JSON.parse(text) : {});
             })
             .then(result => {
                 if (result.success) {
+                    showMessage(result);
+                    fetchSalary();
                     fetchDebts();
+                    fetchLeftTovers();
                     closeModal();
                     location.reload();
                 } else {
-                    showError(result.error || "Erro ao adicionar o expense.");
+                    showMessage(result);
                 }
             })
             .catch(error => {
                 console.error("Erro ao enviar:", error);
-                showError("Erro inesperado ao tentar adicionar o expense.");
             });
     }
 
-    function handleAddShopping() {
-        const nome  = document.getElementById("nome").value.trim();
-        const quantidade  = document.getElementById("quantidade").value.trim();
-        const valor  = document.getElementById("valor").value.trim();
 
+    // Função para processar o envio do formulário de adição de despesa
+    function handleUpdateExpense() {
+        const id = document.getElementById("idUpdate").value;
+        const nome = document.getElementById("nomeUpdate").value.trim();
+        const valor = document.getElementById("valorUpdate").value.trim();
+        const date = document.getElementById("dateUpdate").value.trim();
+        const situacao = document.getElementById("situacaoUpdate").value;
 
-        if (!nome || !isValidAmount(valor) || !quantidade) {
-            showError("Preencha todos os campos corretamente.");
-            return;
-        }
-        
-        fetch("/addShopping", {
+        fetch("/updateExpense", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ nome, quantidade, valor })
+            body: JSON.stringify({ id, nome, valor, date, situacao })
         })
             .then(response => {
                 if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
@@ -228,26 +242,37 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(result => {
                 if (result.success) {
                     closeModal();
-                    location.reload();
+                    showMessage(result);
+                    fetchSalary();
+                    fetchDebts();
+                    fetchLeftTovers();
                 } else {
-                    showError(result.error || "Erro ao adicionar o shopping.");
+                    showMessage(result);
                 }
             })
             .catch(error => {
                 console.error("Erro ao enviar:", error);
-                showError("Erro inesperado ao tentar adicionar o shopping.");
             });
     }
 
-    // Função para validar entrada numérica
-    function isValidAmount(value) {
-        return /^[0-9]+(\.[0-9]{1,2})?$/.test(value);
+    function showMessage(result){
+        if(result.success){
+            successMessage(result.message);
+        }else{
+            errorMessages(result.message);
+        }
     }
 
-    // Função para exibir erro
-    function showError(message) {
-        errorMessage.textContent = message;
-        errorMessage.style.display = "flex";
+    function errorMessages(message){
+        const error = document.querySelector(".erro");
+        error.style.display = "flex";
+        error.textContent = message;
+    }
+
+    function successMessage(message){
+        const success = document.querySelector(".success");
+        error.style.display = "flex";
+        success.textContent = message;
     }
 
     // Função para fechar modais
@@ -256,7 +281,6 @@ document.addEventListener("DOMContentLoaded", function () {
         modalAdd.style.display = "none";
         formAddAmount.reset();
         formAddExpense.reset();
-        errorMessage.style.display = "none";
     }
 
     // Configura eventos dos modais
@@ -280,6 +304,7 @@ document.addEventListener("DOMContentLoaded", function () {
         window.addEventListener("click", event => {
             if (event.target === modalAdd || event.target === modalAddAmount) {
                 closeAllModals();
+                errorMessages.style.display = "none";
             }
         });
     }
@@ -296,20 +321,21 @@ document.addEventListener("DOMContentLoaded", function () {
         const editButtons = document.querySelectorAll(".edit");
 
         editButtons.forEach(edit => {
-            edit.addEventListener("click", function () {
-                populateEditModal(edit);
+            edit.addEventListener("click", function (event) {
+                const expenseId = event.target.closest(".edit").dataset.id;
+                fetchData(`/expense/${expenseId}`)
+                    .then(data => populateEditModal(data))
                 modalEdit.style.display = "flex";
             });
         });
     }
 
     // Preenche o modal de edição com os dados selecionados
-    function populateEditModal(edit) {
-        document.getElementById("idUpdate").value = edit.getAttribute("data-id");
-        document.getElementById("nomeUpdate").value = edit.getAttribute("data-name");
-        document.getElementById("valorUpdate").value = edit.getAttribute("data-amount");
-        document.getElementById("dateUpdate").value = edit.getAttribute("data-date");
-        document.getElementById("situacaoUpdate").value =
-            edit.getAttribute("data-situacao") === "PAGO" ? "Pago" : "A Pagar";
+    function populateEditModal(data) {
+        document.getElementById("idUpdate").value = data.id;
+        document.getElementById("nomeUpdate").value = data.nome;
+        document.getElementById("valorUpdate").value = data.valor;
+        document.getElementById("dateUpdate").value = data.date;
+        document.getElementById("situacaoUpdate").value = data.situacao;
     }
 });

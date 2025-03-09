@@ -15,7 +15,7 @@ import lombok.Data;
 public class ExpenseInput {
     @NotBlank(message = "O Nome não pode estar em branco")
     private String nome;
-    @NotNull
+    @NotNull(message = "O Valor não pode estar em branco ou vazio.")
     @Positive(message = "O Valor não pode ser menor que R$ 1,00.")
     private BigDecimal valor;
     @NotNull(message = "O Data não pode estar vazia.")
