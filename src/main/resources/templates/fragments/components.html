@@ -2,14 +2,14 @@
 <html lang="pt" xmlns:th="http://www.thymeleaf.org">
     <!-- Input  -->
     <div th:fragment="input-field(id, label, type, name, required, placeholder)">
-        <div class="input-field" style="flex-direction: row; align-items: center;" >
+        <div class="input-field" style="flex-direction: column; align-items: center;" >
             <label th:for="${id}" th:text="${label}" style="text-align: start;"></label>
             <input th:id="${id}" th:name="${name}" th:type="${type}" th:required="${required}"  th:placeholder="${placeholder}">
         </div>
     </div>
     <!-- Select  -->
     <div th:fragment="select-situacao(id, name)">
-        <div class="input-field" style="flex-direction: row; align-items: center;">
+        <div class="input-field" style="flex-direction: column; align-items: center;">
             <label th:for="${id}" style="text-align: start;">Situação</label>
             <select th:id="${id}" th:name="${name}" required>
                 <option value="A Pagar">A Pagar</option>

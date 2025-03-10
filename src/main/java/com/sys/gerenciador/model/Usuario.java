@@ -9,7 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Data;
 
-@Entity
+@Entity(name = "usuario")
 @Data
 public class Usuario {
     @Id

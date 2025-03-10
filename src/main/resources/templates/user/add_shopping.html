@@ -7,12 +7,18 @@
 
 <body>
 <section class="content">
+    <!-- Loading -->
+    <div id="loading" class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+    
     <!-- Totalizador -->
     <div class="totalizador">
         <div class="contabilizador-salario">
             <h1 style="text-align: center;">Total</h1>
             <div>
-                <p style="font-size: 35px; color: #000;">R$ 0,00</p>
+                <p id="amountShop" style="font-size: 35px; color: #000;">R$ 0,00</p>
+                <div class="skeleton-loader"></div>
             </div>
         </div>
     </div>
@@ -27,7 +33,7 @@
     <div id="addModal" class="modal">
         <div class="modal-content">
             <h1>Compra</h1>
-            <form th:action="@{/addShopping}" method="post">
+            <form id="addShopping">
                 <div th:replace="~{fragments/components :: input-field('nome', 'Nome', 'text', 'nome', true, 'Digite o nome')}"></div>
                 <div th:replace="~{fragments/components :: input-field('quantidade', 'Quantidade', 'text', 'nome', true, 'Digite a quantidade')}"></div>
                 <div th:replace="~{fragments/components :: input-field('valor', 'Valor unitário', 'text', 'valor', true, 'Digite o valor unitário')}"></div>
@@ -41,9 +47,9 @@
         </div>
     </div>
 
-    <!-- Lista de Despesas -->
+    <!-- Lista de Compras -->
     <div class="expenses">
-        <div class="table" th:if="${expenseSize>0}">
+        <div class="table" th:if="${shoppingSize>0}">
             <table>
                 <thead>
                 <tr>
@@ -55,19 +61,12 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="e : ${expenses}">
-                    <td th:text="${e.nome}"></td>
-                    <td th:text="${e.valor}"></td>
-                    <td th:text="${#temporals.format(e.date, 'dd/MM/yyyy')}"></td>
-                    <td class="status-content">
-                        <span class="status" th:classappend="${e.situacao.nome == 'A Pagar' ? 'a-pagar' : 'pago'}"
-                              th:text="${e.situacao.nome}"></span>
-                    </td>
+                <tr th:each="s : ${shoppings}">
+                    <td th:text="${s.nome}"></td>
+                    <td th:text="${s.quantidade}"></td>
+                    <td th:text="${s.valor}"></td>
                     <td class="expense-action">
-                        <a class="edit" data-bs-toggle="modal" data-bs-target="#editModal"
-                           th:data-id="${e.id}" th:data-name="${e.nome}" th:data-amount="${e.valor}"
-                           th:data-date="${e.date}" th:data-situacao="${e.situacao}"><i
-                                class="fa-solid fa-pen-to-square"></i></a>
+                        <a class="edit" th:data-id="${s.id}"><i class="fa-solid fa-pen-to-square"></i></a>
                         <a th:href="@{/removeExpense(id=${e.id})}"><i class="fa-regular fa-trash-can"></i></a>
                     </td>
                 </tr>
@@ -75,10 +74,10 @@
             </table>
         </div>
 
-        <p class="expenseEmpty" th:unless="${expenseSize>0}">Você não tem compras cadastradas. <br>Por favor, Adicione
+        <p class="expenseEmpty" th:unless="${shoppingSize>0}">Você não tem compras cadastradas. <br>Por favor, Adicione
             uma Compra!</p>
 
-        <!-- Modal de Edição de Despesa -->
+        <!-- Modal de Edição de Compra -->
         <div id="edit" class="modal">
             <div class="modal-content">
                 <h1>Editar Compra</h1>
@@ -100,7 +99,7 @@
 
     </div>
     <!-- Paginação -->
-    <div class="counterPages" th:if="${expenseSize > 5}">
+    <div class="counterPages" th:if="${shoppingSize > 5}">
         <a th:href="@{/expenses(page=${currentPage - 1})}" th:if="${currentPage > 1}">
             <i class="fa-solid fa-chevron-left"></i> Anterior
         </a>
