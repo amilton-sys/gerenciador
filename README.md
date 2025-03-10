@@ -36,18 +36,18 @@ Sistema de gerenciamento de gastos pessoais desenvolvido com Spring Boot.
 git clone https://github.com/seu-usuario/gerenciador.git
 ```
 
-2. Configure as variáveis de ambiente no arquivo `.env`:
+2. Configure as variáveis de ambiente no arquivo `.properties`:
+
 ```properties
-DB_HOST=localhost
-DB_USERNAME=root
-DB_PASSWORD=root
-DB_DDL_AUTO=update 
-//Caso queira usar o import.sql que já existe no projeto coloque como create
-DB_DDL_AUTO=update 
-MAIL_HOST=smtp.gmail.com
-MAIL_USERNAME=seu-email@gmail.com
-MAIL_PASSWORD=sua-senha
-MAIL_PORT=587
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+
+spring.datasource.url=jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:manager}?createDatabaseIfNotExist=true&serverTimezone=UTC&serverTimezone=UTC
+spring.datasource.username=${MYSQL_USERNAME:root}
+spring.datasource.password=${MYSQL_PASSWORD:root}
+
+spring.jpa.hibernate.ddl-auto=create com import.sql de dados fictícios
+#spring.jpa.hibernate.ddl-auto=update sem import.sql
 ```
 
 3. Execute o projeto:
@@ -66,5 +66,4 @@ docker build -t gerenciador .
 ```bash
 docker-compose up -d
 ```
-
-## 📦 Estrutura do Projeto
+3. Acessar http://localhost:8080
