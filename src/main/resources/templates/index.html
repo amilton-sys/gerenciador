@@ -12,35 +12,33 @@
             <h1>Comparação mensal</h1>
             <canvas id="expensesChart"></canvas>
         </div>
-        <script>
+        <script th:inline="javascript">
             const ctx = document.getElementById('expensesChart').getContext('2d');
-            const thisWeek = [[${ dataThisWeek }]];
-            const lastWeek = [[${ dataLastWeek }]];
-            const labelsj = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+            const meses = [[${ mesesValor }]];
+            const mesesString = [[${ meses }]]
+
             const expensesChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: labelsj,
+                    labels: mesesString,
                     datasets: [
                         {
-                            label: 'Mês Atual',
-                            data: thisWeek,
-                            backgroundColor: '#0f766e', // Greenish color
+                            label: "Meses do ano atual",
+                            data: meses,
+                            backgroundColor: '#0f766e'),
                             borderRadius: 4,
-                            barThickness: 20,
-                        },
-                        {
-                            label: 'Útilmo Mês',
-                            data: lastWeek,
-                            backgroundColor: '#d1d5db', // Light gray
-                            borderRadius: 4,
-                            barThickness: 20,
+                            barThickness: 30,
                         }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            bottom: 30
+                        }
+                    },
                     plugins: {
                         legend: {
                             display: true,
@@ -79,11 +77,6 @@
                                 }
                             },
                             max: 5000
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            },
                         }
                     }
                 }

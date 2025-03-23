@@ -1,17 +1,14 @@
 package com.sys.gerenciador.service.impl;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
+import com.sys.gerenciador.model.User;
+import com.sys.gerenciador.repository.IUserRepository;
 import com.sys.gerenciador.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.sys.gerenciador.model.Usuario;
-import com.sys.gerenciador.repository.IUserRepository;
-import com.sys.gerenciador.util.AppConstant;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements IUserService {
@@ -21,15 +18,12 @@ public class UserServiceImpl implements IUserService {
     private PasswordEncoder passwordEncoder;
 
     @Override
-    public void saveUser(Usuario usuario) {
-        usuario.setRole("ROLE_USER");
-        usuario.setIsEnable(true);
-        usuario.setAccountNonLocked(true);
-        usuario.setFailedAttempt(0);
-        String capitalizeFirstLetter = capitalizeFirstLetter(usuario.getName());
-        usuario.setName(capitalizeFirstLetter);
-        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
-        userRepository.save(usuario);
+    public User saveUser(User user) {
+        String capitalizeFirstLetter = capitalizeFirstLetter(user.getName());
+        user.setName(capitalizeFirstLetter);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        
+        return userRepository.save(user);
     }
 
     private String capitalizeFirstLetter(String text) {
@@ -40,54 +34,46 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public Usuario getUserByEmail(String email) {
+    public User getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
     @Override
-    public List<Usuario> getUsers(String role) {
+    public List<User> getUsers(String role) {
         return userRepository.findByRole(role);
     }
 
     @Override
     public Boolean updateAccountStatus(Long id, Boolean status) {
-        Optional<Usuario> findUser = userRepository.findById(id);
+        Optional<User> findUser = userRepository.findById(id);
         if (findUser.isPresent()) {
-            Usuario usuario = findUser.get();
-            usuario.setIsEnable(status);
-            userRepository.save(usuario);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public void increaseFailedAttempt(Usuario usuario) {
-        int attempt = usuario.getFailedAttempt() + 1;
-        usuario.setFailedAttempt(attempt);
-        userRepository.save(usuario);
-    }
-
-    @Override
-    public void userAccountLock(Usuario usuario) {
-        usuario.setAccountNonLocked(false);
-        usuario.setLockTime(new Date());
-        userRepository.save(usuario);
-    }
-
-    @Override
-    public boolean unlockAccountTimeExpired(Usuario user) {
-        long lockTime = user.getLockTime().getTime();
-        long unLockTime = lockTime + AppConstant.UNLOCK_DURATION_TIME;
-        long currentTime = System.currentTimeMillis();
-        if (unLockTime < currentTime) {
-            user.setAccountNonLocked(true);
-            user.setFailedAttempt(0);
-            user.setLockTime(null);
+            User user = findUser.get();
+            user.setIsEnable(status);
             userRepository.save(user);
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void increaseFailedAttempt(User user) {
+        user.incrementFailedAttempt();
+        userRepository.save(user);
+    }
+
+    @Override
+    public void userAccountLock(User user) {
+        user.lock();
+        userRepository.save(user);
+    }
+
+    @Override
+    public boolean unlockAccountTimeExpired(User user) {
+        boolean unlocked = user.unlockAccountTimeExpired();
+        if (unlocked) {
+            userRepository.save(user);
+        }
+        return unlocked;
     }
 
     @Override
@@ -97,18 +83,18 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public void updateUserResetToken(String email, String resetToken) {
-        Usuario byEmail = userRepository.findByEmail(email);
+        User byEmail = userRepository.findByEmail(email);
         byEmail.setResetToken(resetToken);
         userRepository.save(byEmail);
     }
 
     @Override
-    public Usuario getUserByToken(String token) {
+    public User getUserByToken(String token) {
         return userRepository.findByResetToken(token);
     }
 
     @Override
-    public Usuario updateUser(Usuario user) {
+    public User updateUser(User user) {
         return userRepository.save(user);
     }
 

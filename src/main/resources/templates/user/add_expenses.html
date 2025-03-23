@@ -73,7 +73,7 @@
                         th:replace="~{fragments/components :: input-field('valor', 'Valor', 'text', 'valor', false, 'Digite o valor')}">
                     </div>
                     <div th:replace="~{fragments/components :: input-field('date', 'Data', 'date', 'date', false, '')}"></div>
-                    <div th:replace="~{fragments/components :: select-situacao('situacao', 'situacao')}"></div>
+                    <div th:replace="~{fragments/components :: select-situation('situation', 'situation')}"></div>
                     <div class="expense-button">
                         <button class="button">Salvar</button>
                         <button type="reset" class="button close"
@@ -99,13 +99,13 @@
                     </thead>
                     <tbody>
                         <tr th:each="e : ${expenses}">
-                            <td th:text="${e.nome}"></td>
-                            <td th:text="${e.valor}"></td>
+                            <td th:text="${e.name}"></td>
+                            <td th:text="${e.value}"></td>
                             <td th:text="${#temporals.format(e.date, 'dd/MM/yyyy')}"></td>
                             <td class="status-content">
                                 <span class="status"
-                                    th:classappend="${e.situacao.nome == 'A Pagar' ? 'a-pagar' : 'pago'}"
-                                    th:text="${e.situacao.nome}"></span>
+                                    th:classappend="${e.situation == 'PAY' ? 'a-pagar' : 'pago'}"
+                                    th:text="${e.situation}"></span>
                             </td>
                             <td class="expense-action">
                                 <a class="edit" th:data-id="${e.id}"><i class="fa-solid fa-pen-to-square"></i></a>
@@ -135,7 +135,7 @@
                         <div
                             th:replace="~{fragments/components :: input-field('dateUpdate', 'Data', 'date', 'date', true, '')}">
                         </div>
-                        <div th:replace="~{fragments/components :: select-situacao('situacaoUpdate', 'situacao')}">
+                        <div th:replace="~{fragments/components :: select-situation('situacaoUpdate', 'situacao')}">
                         </div>
                         <input type="hidden" name="id" id="idUpdate">
                         <div class="expense-button">
@@ -149,13 +149,13 @@
             </div>
         </div>
         <div class="counterPages" th:if="${expenseSize>0}">
-            <a th:href="@{'/addExpenses?pageNumber='+${pageNumber-1}}" th:classappend="${isFirst} ? 'disabled' : ''"><i
+            <a th:href="@{'/loadExpenses?pageNumber='+${pageNumber-1}}" th:classappend="${isFirst} ? 'disabled' : ''"><i
                     class="fa-solid fa-chevron-left"></i> Anterior</a>
             <div>
-                <a th:href="@{'/addExpenses?pageNumber='+${i-1}}" th:text="${i}"
+                <a th:href="@{'/loadExpenses?pageNumber='+${i-1}}" th:text="${i}"
                     th:classappend="${pageNumber+1==i} ? 'ativo':''" th:each="i:${#numbers.sequence(1,totalPages)}"></a>
             </div>
-            <a th:href="@{'/addExpenses?pageNumber='+${pageNumber+1}}"
+            <a th:href="@{'/loadExpenses?pageNumber='+${pageNumber+1}}"
                 th:classappend="${isLast} ? 'disabled' : ''">Próximo <i class="fa-solid fa-chevron-right"></i></a>
         </div>
     </section>

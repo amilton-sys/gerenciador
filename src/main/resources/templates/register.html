@@ -12,15 +12,7 @@
                 <h1 class="login-title">Gerenciar</h1>
                 <h2 class="login-description">Crie uma Conta</h2>
             </div>
-            <th:block th:if="${session.succMsg}">
-                <p class="success">[[${session.succMsg}]]</p>
-                <th:block th:text="${@commonServiceImpl.removeSessionMessage()}"></th:block>
-            </th:block>
-            <th:block th:if="${session.errorMsg}">
-                <p class="erro">[[${session.errorMsg}]]</p>
-                <th:block th:text="${@commonServiceImpl.removeSessionMessage()}"></th:block>
-            </th:block>
-            <form th:action="@{/saveUser}" method="post">
+            <form id="form-login">
                 <div class="input-field">
                     <label for="nome">Nome</label>
                     <input type="text" class="input-nome" placeholder="Digite seu nome" id="nome" name="name">

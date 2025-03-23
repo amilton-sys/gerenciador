@@ -77,24 +77,6 @@ body {
 }
 
 
-#confettiBtn {
-    font-size: 20px;
-    padding: 10px 20px;
-    border: none;
-    background: #4caf50;
-    color: white;
-    cursor: pointer;
-}
-
-.confetti {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    background: red;
-    opacity: 0.8;
-    animation: fall 1s linear infinite;
-}
-
 @keyframes fall {
     0% {
         transform: translateY(0);

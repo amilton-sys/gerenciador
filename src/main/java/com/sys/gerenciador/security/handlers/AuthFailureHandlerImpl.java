@@ -1,12 +1,15 @@
 package com.sys.gerenciador.security.handlers;
 
-import com.sys.gerenciador.model.Usuario;
+import com.sys.gerenciador.model.User;
 import com.sys.gerenciador.repository.IUserRepository;
 import com.sys.gerenciador.service.IUserService;
 import com.sys.gerenciador.util.AppConstant;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
@@ -15,9 +18,11 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 @Component
 public class AuthFailureHandlerImpl extends SimpleUrlAuthenticationFailureHandler {
+    private static final Logger logger = LoggerFactory.getLogger(AuthFailureHandlerImpl.class);
     private final IUserRepository userRepository;
     private final IUserService userService;
 
@@ -28,38 +33,57 @@ public class AuthFailureHandlerImpl extends SimpleUrlAuthenticationFailureHandle
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
-            AuthenticationException exception) throws IOException, ServletException {
+                                        AuthenticationException exception) throws IOException, ServletException {
         String email = request.getParameter("username");
-        Usuario user = userRepository.findByEmail(email);
+        logger.warn("Tentativa de login malsucedida para o e-mail: {} em {}", email, LocalDateTime.now());
+        logger.debug("Exceção original: {}", exception.getMessage());
 
-        if (exception instanceof BadCredentialsException) {
-            exception = new BadCredentialsException("E-mail ou senha inválidos. Tente novamente.");
-        }
+        User user = userRepository.findByEmail(email);
+        AuthenticationException customException;
+        String failureUrl = "/signin?error";
 
-        if (user != null) {
-            if (user.getIsEnable()) {
-                if (user.getAccountNonLocked()) {
-                    if (user.getFailedAttempt() < AppConstant.ATTEMPT_TIME) {
-                        userService.increaseFailedAttempt(user);
-                    } else {
-                        userService.userAccountLock(user);
-                        exception = new LockedException("Sua conta está bloqueada. Tentativa falhada 3.");
-                    }
-                } else {
-                    if (userService.unlockAccountTimeExpired(user)) {
-                        exception = new LockedException("Sua conta está desbloqueada.Por favor, tente fazer login.");
-                    } else {
-                        exception = new LockedException("Sua conta está bloqueada. Por favor, tente mais tarde.");
-                    }
-                }
+        if (user == null) {
+            customException = new UsernameNotFoundException("E-mail ou Senha Inválida. Por favor, Registre-se.");
+            logger.info("Usuário não encontrado com o e-mail: {}", email);
+            failureUrl = "/signin?error=notfound";
+        } else if (user.isDisabled()) {
+            customException = new LockedException("Sua conta está inativa.");
+            logger.info("Tentativa de login em conta inativa: {}", email);
+            failureUrl = "/signin?error=inactive";
+        } else if (user.getAccountNonLocked()) {
+            if (user.getFailedAttempt() < AppConstant.Security.MAX_FAILED_ATTEMPTS - 1) {
+                userService.increaseFailedAttempt(user);
+                long tentativasRestantes = AppConstant.Security.MAX_FAILED_ATTEMPTS - user.getFailedAttempt();
+                customException = new BadCredentialsException("E-mail ou senha inválidos. Tentativa " +
+                        user.getFailedAttempt() + " de " + AppConstant.Security.MAX_FAILED_ATTEMPTS +
+                        ". Restam " + tentativasRestantes + " tentativas.");
+                logger.info("Tentativa de login falha para usuário {}: {} de {} tentativas",
+                        email, user.getFailedAttempt(), AppConstant.Security.MAX_FAILED_ATTEMPTS);
             } else {
-                exception = new LockedException("Sua conta está inativa.");
+                userService.userAccountLock(user);
+                customException = new LockedException("Sua conta foi bloqueada devido a " +
+                        AppConstant.Security.MAX_FAILED_ATTEMPTS + " tentativas falhas. Tente novamente em " +
+                        (AppConstant.Security.UNLOCK_DURATION_TIME / 60000) + " minutos.");
+                logger.warn("Conta bloqueada após tentativas máximas para o usuário: {}", email);
+                failureUrl = "/signin?error=locked";
             }
+        } else if (userService.unlockAccountTimeExpired(user)) {
+            customException = new LockedException("Sua conta foi desbloqueada. Por favor, tente fazer login novamente.");
+            logger.info("Conta desbloqueada automaticamente para o usuário: {}", email);
+            failureUrl = "/signin?error=unlocked";
         } else {
-            exception = new UsernameNotFoundException("E-mail ou Senha Invalida. Por favor, Registre-se.");
+            long lockTimeMillis = user.getLockTime().getTime();
+            long unlockTimeMillis = lockTimeMillis + AppConstant.Security.UNLOCK_DURATION_TIME;
+            long currentTimeMillis = System.currentTimeMillis();
+            long minutesRemaining = (unlockTimeMillis - currentTimeMillis) / 60000;
+
+            customException = new LockedException("Sua conta está bloqueada. Por favor, tente novamente em aproximadamente " +
+                    minutesRemaining + " minutos.");
+            logger.info("Tentativa de login em conta bloqueada: {}", email);
+            failureUrl = "/signin?error=stillLocked";
         }
 
-        super.setDefaultFailureUrl("/signin?error");
-        super.onAuthenticationFailure(request, response, exception);
+        super.setDefaultFailureUrl(failureUrl);
+        super.onAuthenticationFailure(request, response, customException);
     }
 }

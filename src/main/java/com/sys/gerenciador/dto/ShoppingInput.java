@@ -8,10 +8,10 @@ import java.math.BigDecimal;
 
 public class ShoppingInput {
     @NotBlank(message = "O Nome não pode estar em branco")
-    private String nome;
+    private String name;
     @Positive(message = "A quantidade não pode ser menor que zero.")
-    private int quantidade;
+    private int quantity;
     @NotNull
     @Positive(message = "O Valor não pode ser menor que R$ 1,00.")
-    private BigDecimal valor;
+    private BigDecimal value;
 }

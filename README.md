@@ -33,7 +33,7 @@ Sistema de gerenciamento de gastos pessoais desenvolvido com Spring Boot.
 
 1. Clone o repositório:
 ```bash
-git clone https://github.com/seu-usuario/gerenciador.git
+git clone https://github.com/seu-user/gerenciador.git
 ```
 
 2. Configure as variáveis de ambiente no arquivo `.properties`:

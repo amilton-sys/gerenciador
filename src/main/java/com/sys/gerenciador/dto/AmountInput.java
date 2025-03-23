@@ -10,5 +10,5 @@ import java.math.BigDecimal;
 public class AmountInput {
     @NotNull(message = "O Valor não pode estar em branco ou vazio.")
     @Positive(message = "O Valor não pode ser menor que R$ 1,00.")
-    private BigDecimal amount;
+    private BigDecimal salary;
 }

@@ -8,12 +8,12 @@
         </div>
     </div>
     <!-- Select  -->
-    <div th:fragment="select-situacao(id, name)">
+    <div th:fragment="select-situation(id, name)">
         <div class="input-field" style="flex-direction: column; align-items: center;">
             <label th:for="${id}" style="text-align: start;">Situação</label>
             <select th:id="${id}" th:name="${name}" required>
-                <option value="A Pagar">A Pagar</option>
-                <option value="Pago">Pago</option>
+                <option value="PAY">A Pagar</option>
+                <option value="PAID">Pago</option>
             </select>
         </div>
     </div>
