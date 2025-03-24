@@ -12,28 +12,31 @@
                 <h1 class="login-title">Gerenciar</h1>
                 <h2 class="login-description">Crie uma Conta</h2>
             </div>
-            <form id="form-login">
+            <form id="form-register">
                 <div class="input-field">
                     <label for="nome">Nome</label>
-                    <input type="text" class="input-nome" placeholder="Digite seu nome" id="nome" name="name">
+                    <input type="text" class="input-nome" placeholder="Digite seu nome" id="nome" name="name" data-validate="required">
                 </div>
 
                 <div class="input-field">
                     <label for="email">Email</label>
-                    <input type="email" class="input-email" placeholder="Digite seu email" id="email" name="email">
+                    <input type="email" class="input-email" placeholder="Digite seu email" id="email" name="email" data-validate="required|email">
                 </div>
 
                 <div class="input-field">
                     <div class="login-password">
-                        <label for="senha">Senha</label>
+                        <label for="password">Senha</label>
                     </div>
-                    <input type="password" class="input-senha" placeholder="Digite sua senha" id="senha" name="password">
+                    <input type="password" class="input-senha" placeholder="Digite sua senha" id="password" name="password" data-validate="required|password">
                 </div>
+                <br>
+                <br>
+                <br>
                 <div class="input-field">
                     <div class="login-password">
-                        <label for="senha">Confirmação de Senha</label>
+                        <label for="cpassword">Confirmação de Senha</label>
                     </div>
-                    <input type="password" class="cinput-senha" placeholder="Digite sua confirmação senha" id="csenha">
+                    <input type="password" class="cinput-senha" placeholder="Digite sua confirmação senha" id="cpassword" data-validate="required|matches:password">
                 </div>
                 <div class="login-button">
                     <button class="button">Cadastrar</button>
@@ -42,6 +45,6 @@
             </form>
         </div>
     </section>
-    <script defer src="/js/scripts.js"></script>
+    <script defer src="/js/scripts.js" type="module"></script>
 </body>
 </html>

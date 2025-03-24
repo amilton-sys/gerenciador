@@ -20,7 +20,9 @@ import org.springframework.web.util.UriComponents;
 
 import java.net.URI;
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @Controller
@@ -126,11 +128,14 @@ public class HomeController {
     }
 
     @PostMapping("/saveUser")
-    public ResponseEntity<User> saveUser(@RequestBody @Valid UserInput userInput) {
+    public ResponseEntity<Map<String, String>> saveUser(@RequestBody @Valid UserInput userInput) {
+        var response = new HashMap<String, String>();
         User user = userInputDesassembler.toDomainObject(userInput);
         user = userService.saveUser(user);
         URI uri = ResourceUriHelper.buildUri(user);
-        return ResponseEntity.created(uri).build();
+        response.put("success", "true");
+        response.put("message", "Usuário cadastrado com sucesso.");
+        return ResponseEntity.created(uri).body(response);
     }
 
 }

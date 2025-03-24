@@ -4,6 +4,7 @@ import { FormValidator } from "./validator.js";
 const formAddAmount = document.getElementById("formAddAmount");
 const formAddExpense = document.getElementById("despesaForm");
 const formEditExpense = document.getElementById("editExpense");
+const formRegister = document.getElementById("form-register");
 
 const inputAmount = document.getElementById("valorAmount");
 const salaryAmount = document.getElementById("salaryAmount");
@@ -32,15 +33,29 @@ if (salaryAmount) {
 }
 
 //    fetchTotalShopping();
+const validator = new FormValidator(formRegister);
+formRegister.addEventListener("submit", function (event) {
+    event.preventDefault();
+    if (validator.isFormValid()) {
+        handleAddUser();
+    }
+});
+
+formRegister.addEventListener("input", function (event) {
+    if (event.target.dataset.validate) {
+        validator.validateField(event.target);
+    }
+});
+
 
 if (salaryAmount) {
     // Evento para submissão do formulário
     const validator = new FormValidator(formAddAmount);
     formAddAmount.addEventListener("submit", function (event) {
+        event.preventDefault();
         if (validator.isFormValid()) {
             handleAddAmount();
         }
-        event.preventDefault();
     });
 
     formAddAmount.addEventListener("input", function (event) {
@@ -86,48 +101,48 @@ function toggleSkeletonLoader(isLoading) {
 function fetchSalary() {
     fetchData("/getSalary")
         .then(data => {
-        const dados = data.salary || 0.00;
-        setAmountDisplay(dados, salaryAmount);
-    })
+            const dados = data.salary || 0.00;
+            setAmountDisplay(dados, salaryAmount);
+        })
         .catch(error => {
-        console.log("Erro ao buscar salary", error);
-    })
+            console.log("Erro ao buscar salary", error);
+        })
 }
 
 function fetchTotalShopping() {
     const totalShoppingAmount = document.getElementById("amountShop");
     fetchData("/getTotalShopping")
         .then(data => {
-        const dados = data.totalShopping || 0.00;
-        setAmountDisplay(dados, totalShoppingAmount);
-    })
+            const dados = data.totalShopping || 0.00;
+            setAmountDisplay(dados, totalShoppingAmount);
+        })
         .catch(error => {
-        console.log("Erro ao buscar totalShopping", error);
-    })
+            console.log("Erro ao buscar totalShopping", error);
+        })
 }
 
 // Função para buscar as dividas no servidor
 function fetchDebts() {
     fetchData("/getDebts")
         .then(data => {
-        const dados = data.debts || 0.00;
-        setAmountDisplay(dados, debtsAmount);
-    })
+            const dados = data.debts || 0.00;
+            setAmountDisplay(dados, debtsAmount);
+        })
         .catch(error => {
-        console.log("Erro ao buscar debitos", error);
-    })
+            console.log("Erro ao buscar debitos", error);
+        })
 }
 
 // Função para buscar as sobras no servidor
 function fetchLeftOvers() {
     fetchData("/getleftovers")
         .then(data => {
-        const dados = data.leftovers || 0.00;
-        setAmountDisplay(dados, leftoversAmount);
-    })
+            const dados = data.leftovers || 0.00;
+            setAmountDisplay(dados, leftoversAmount);
+        })
         .catch(error => {
-        console.log("Erro ao buscar sobras", error);
-    })
+            console.log("Erro ao buscar sobras", error);
+        })
 }
 
 
@@ -135,15 +150,15 @@ function fetchData(path) {
     toggleSkeletonLoader(true);
     return fetch(path)
         .then(response => {
-        if (!response.ok) {
-            throw new Error(`Erro na requisição: ${response.statusText}`);
-        }
-        return response.json();
-    })
+            if (!response.ok) {
+                throw new Error(`Erro na requisição: ${response.statusText}`);
+            }
+            return response.json();
+        })
         .catch(error => {
-        console.log("Erro ao obter dados:", error);
-        return null;
-    })
+            console.log("Erro ao obter dados:", error);
+            return null;
+        })
         .finally(() => toggleSkeletonLoader(false));
 }
 
@@ -167,24 +182,47 @@ function handleAddAmount() {
         body: JSON.stringify({ amount })
     })
         .then(response => {
-        return response.text().then(text => text ? JSON.parse(text) : {});
-    })
+            return response.text().then(text => text ? JSON.parse(text) : {});
+        })
         .then(result => {
-        if (result.success) {
-            showMessage(result);
-            fetchSalary();
-            fetchDebts();
-            fetchLeftOvers();
-            closeModal();
-        } else {
-            showMessage(result);
-        }
-    })
+            if (result.success) {
+                showMessage(result);
+                fetchSalary();
+                fetchDebts();
+                fetchLeftOvers();
+                closeModal();
+            } else {
+                showMessage(result);
+            }
+        })
         .catch(error => {
-        console.error("Erro ao enviar:", error);
-    });
+            console.error("Erro ao enviar:", error);
+        });
 }
 
+// Função para processar o envio do formulário de usuario
+function handleAddUser() {
+    const name = document.getElementById("nome").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    console.log("PASSOU AQUI handleAddUser");
+
+    fetch("/saveUser", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome, email, password })
+    })
+        .then(response => {
+            return response.text().then(text => text ? JSON.parse(text) : {});
+        })
+        .then(result => {
+           validator.handleBackendValidationErrors(result);
+        })
+        .catch(error => {
+            console.error("Erro ao enviar:", error);
+        });
+}
 
 // Função para processar o envio do formulário de adição de despesa
 function handleAddExpense() {
@@ -201,23 +239,23 @@ function handleAddExpense() {
         body: JSON.stringify({ nome, valor, date, situacao })
     })
         .then(response => {
-        return response.text().then(text => text ? JSON.parse(text) : {});
-    })
+            return response.text().then(text => text ? JSON.parse(text) : {});
+        })
         .then(result => {
-        if (result.success) {
-            showMessage(result);
-            fetchSalary();
-            fetchDebts();
-            fetchLeftOvers();
-            closeModal();
-            location.reload();
-        } else {
-            showMessage(result);
-        }
-    })
+            if (result.success) {
+                showMessage(result);
+                fetchSalary();
+                fetchDebts();
+                fetchLeftOvers();
+                closeModal();
+                location.reload();
+            } else {
+                showMessage(result);
+            }
+        })
         .catch(error => {
-        console.error("Erro ao enviar:", error);
-    });
+            console.error("Erro ao enviar:", error);
+        });
 }
 
 
@@ -237,35 +275,35 @@ function handleUpdateExpense() {
         if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
         return response.text().then(text => text ? JSON.parse(text) : {});
     }).then(result => {
-    if (result.success) {
-        closeModal();
-        showMessage(result);
-        fetchSalary();
-        fetchDebts();
-        fetchLeftOvers();
-    } else {
-        showMessage(result);
-    }
+        if (result.success) {
+            closeModal();
+            showMessage(result);
+            fetchSalary();
+            fetchDebts();
+            fetchLeftOvers();
+        } else {
+            showMessage(result);
+        }
     }).catch(error => {
         console.log("Erro ao enviar:", error);
     });
 }
 
-function showMessage(result){
-    if(result.success){
+function showMessage(result) {
+    if (result.success) {
         successMessage(result.message);
-    }else{
+    } else {
         errorMessages(result.message);
     }
 }
 
-function errorMessages(message){
+function errorMessages(message) {
     const error = document.querySelector(".erro");
     error.style.display = "flex";
     error.textContent = message;
 }
 
-function successMessage(message){
+function successMessage(message) {
     const success = document.querySelector(".success");
     error.style.display = "flex";
     success.textContent = message;

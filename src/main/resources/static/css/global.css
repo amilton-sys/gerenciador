@@ -16,27 +16,58 @@
     --text-input: #4B5768;
 }
 
+.password-criteria {
+    margin-top: 8px;
+    font-size: 12px;
+  }
+  
+  .criteria-item {
+    margin: 4px 0;
+    transition: color 0.3s;
+  }
+  
+  .criteria-item.valid {
+    color: #4CAF50;
+  }
+  
+  .criteria-item.invalid {
+    color: #F44336;
+  }
+  
+  .icon {
+    margin-right: 5px;
+  }
 
-.erro, .success {
-    position: fixed; /* Fixa as mensagens na tela */
-    top: 10px; /* Distância do topo */
-    left: 50%; /* Coloca no meio horizontalmente */
-    transform: translateX(-50%); /* Ajusta para garantir que as mensagens fiquem centralizadas */
+.erro,
+.success {
+    position: fixed;
+    /* Fixa as mensagens na tela */
+    top: 10px;
+    /* Distância do topo */
+    left: 50%;
+    /* Coloca no meio horizontalmente */
+    transform: translateX(-50%);
+    /* Ajusta para garantir que as mensagens fiquem centralizadas */
     font-size: 16px;
     padding: 10px;
     border-radius: 5px;
-    z-index: 9999; /* Garante que as mensagens fiquem acima de outros elementos */
-    width: auto; /* Pode ajustar o tamanho conforme necessário */
-    max-width: 80%; /* Evita que a mensagem seja muito larga */
-    text-align: center; /* Centraliza o texto dentro da mensagem */
+    z-index: 9999;
+    /* Garante que as mensagens fiquem acima de outros elementos */
+    width: auto;
+    /* Pode ajustar o tamanho conforme necessário */
+    max-width: 80%;
+    /* Evita que a mensagem seja muito larga */
+    text-align: center;
+    /* Centraliza o texto dentro da mensagem */
 }
 
 .erro {
     color: red;
-    background-color: rgba(255, 0, 0, 0.1); /* Cor de fundo transparente com vermelho */
+    background-color: rgba(255, 0, 0, 0.1);
+    /* Cor de fundo transparente com vermelho */
 }
 
-.error{
+.error {
     color: red;
     font-size: 12px;
     margin-top: 5px;
@@ -45,7 +76,16 @@
 
 .success {
     color: green;
-    background-color: rgba(0, 255, 0, 0.1); /* Cor de fundo transparente com verde */
+    background-color: rgba(0, 255, 0, 0.1);
+    /* Cor de fundo transparente com verde */
+}
+
+input.valid {
+    border-color: #28a745 !important;
+}
+
+input.invalid {
+    border-color: #dc3545 !important;
 }
 
 
@@ -81,28 +121,30 @@ body {
     0% {
         transform: translateY(0);
     }
+
     100% {
         transform: translateY(200px);
         opacity: 0;
     }
 }
 
-.status{
-    display:block;
-    border-radius:8px;
+.status {
+    display: block;
+    border-radius: 8px;
 }
 
 .status.pago {
-    color:rgba(5, 145, 68);
+    color: rgba(5, 145, 68);
 }
 
 .status.a-pagar {
-    color:rgba(253, 42, 5);
+    color: rgba(253, 42, 5);
 }
 
 .text-center {
     text-align: center;
 }
+
 .total-valor {
     font-size: 30px;
     color: #000;
@@ -136,13 +178,14 @@ body {
     from {
         transform: rotate(0deg);
     }
+
     to {
         transform: rotate(360deg);
     }
 }
 
 .skeleton-loader {
-    width: 120px; 
+    width: 120px;
     height: 24px;
     background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
     background-size: 200% 100%;
@@ -155,6 +198,7 @@ body {
     0% {
         background-position: -200% 0;
     }
+
     100% {
         background-position: 200% 0;
     }
